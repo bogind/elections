@@ -20,7 +20,7 @@ function addLayer(){
 
     map.addSource('results', {
         'type': 'geojson',
-        'data': results2021.neighbourhoodsData.results//results2021.citiesData.results
+        'data': results2021.citiesData.results//results2021.neighbourhoodsData.results
         });
 
     map.addLayer({
