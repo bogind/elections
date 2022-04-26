@@ -42,7 +42,7 @@ function addInteractions(){
         var description = `<h2>${e.features[0].properties.areaId.trim()}</h2>`;
         description += `${tr(1,ln)} : ${e.features[0].properties.max_party}`
          
-        console.log(center)
+        
          
         new maplibregl.Popup()
             .setLngLat(center.geometry.coordinates)
