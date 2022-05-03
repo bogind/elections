@@ -38,18 +38,62 @@ function addLayer(){
 
 function addInteractions(){
     map.on('click', 'results', function (e) {
-        var center = turf.centroid(e.features[0].geometry);
-        var description = `<h2>${e.features[0].properties.areaId.trim()}</h2>`;
-        description += `${tr(1,ln)} : ${e.features[0].properties.max_party}`
+        var feature = e.features[0];
+        console.log(feature)
+        var center = turf.centroid(feature.geometry);
+        var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
+        description += `${tr(1,ln)} : ${feature.properties.max_party}<br>`
+        description += '<div id="plot">'
+
+        props = JSON.parse(feature.properties.electionsResults)
+        console.log(props)
+        keys = Object.keys(props)
+        values = Object.values(props)
+        var data = []
+        for(var i=0;i<keys.length;i++){
+            trace = {
+                y:['תוצאות'],
+                x:[values[i]],
+                name:keys[i],
+                orientation: 'h',
+                width: 0.5,
+                type:'bar'
+
+            }
+            data.push(trace)
+        }
+        
+        
+        var layout = {barmode: 'stack',
+                        height:200,
+                        showlegend: false,
+                        yaxis:{
+                            showline:false,
+                            showgrid:false
+                        },
+                        xaxis:{
+                            showline:false,
+                            showgrid:false,
+                            zeroline:false
+
+                        },
+                        margin:{
+                            t:0,
+                            b:0,
+                            l:0,
+                            r:0
+                        }};
          
-        console.log(center)
+        
          
-        new maplibregl.Popup()
+        new maplibregl.Popup({maxWidth:'300px'})
             .setLngLat(center.geometry.coordinates)
             .setHTML(description)
             .addTo(map);
         
         setDirection(ln)
+        console.log(data)
+        Plotly.newPlot('plot', data, layout,{scrollZoom: false, displayModeBar: false});
         });
          
         // Change the cursor to a pointer when the mouse is over the places layer.

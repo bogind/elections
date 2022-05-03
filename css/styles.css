@@ -1,5 +1,6 @@
 .maplibregl-popup-content{
     direction: rtl;
+    width: 290px;
 }
 .maplibregl-popup-content > h2{
     margin-left: auto;
