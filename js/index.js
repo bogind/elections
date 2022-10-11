@@ -3,7 +3,7 @@ const urlParams = new URLSearchParams(queryString);
 const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 var map = new maplibregl.Map({
     container: 'map',
-    style: 'style1.json', // stylesheet location
+    style: 'style2.json', // stylesheet location
     center: [35.078096, 31.4411522], // starting position [lng, lat]
     zoom: 7 // starting zoom
     });
