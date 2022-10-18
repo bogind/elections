@@ -1,0 +1,39 @@
+{
+	"version" : 8,
+	"sprite" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/sprites/sprite",
+	"glyphs" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/{fontstack}/{range}.pbf",
+	"sources" : {
+	},
+	"layers" : [
+		{
+				"id": "background",
+				"type": "background",
+				"layout": {
+					"visibility": "visible"
+				},
+				"paint": {
+					"background-color": {
+						"stops": [
+							[
+								6,
+								"rgba(252, 247, 229, 1)"
+							],
+							[
+								10,
+								"rgba(252, 247, 229, 1)"
+							],
+							[
+								14,
+								"rgba(246, 241, 229, 1)"
+							],
+							[
+								15,
+								"rgba(246, 241, 229, 1)"
+							]
+						]
+					}
+				}
+			}
+		
+	]
+}
