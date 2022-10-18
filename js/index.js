@@ -106,6 +106,24 @@ function addLayer(){
         'fill-opacity': 0.8
         }
     });
+    map.addLayer({
+        'id': 'room-extrusion',
+        'type': 'fill-extrusion',
+        'source': 'israelBG',
+        'paint': {
+        // Get the `fill-extrusion-color` from the source `color` property.
+        'fill-extrusion-color': 'blue',
+         
+        // Get `fill-extrusion-height` from the source `height` property.
+        'fill-extrusion-height': 50,
+         
+        // Get `fill-extrusion-base` from the source `base_height` property.
+        'fill-extrusion-base': 5,
+         
+        // Make extrusions slightly opaque to see through indoor walls.
+        'fill-extrusion-opacity': 0.5
+        }
+        });
     addInteractions()
 }
 
