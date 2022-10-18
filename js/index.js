@@ -3,18 +3,91 @@ const urlParams = new URLSearchParams(queryString);
 const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 var map = new maplibregl.Map({
     container: 'map',
-    style: 'style2.json', // stylesheet location
+    style: {
+        "version" : 8,
+        "sprite" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/sprites/sprite",
+        "glyphs" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/{fontstack}/{range}.pbf",
+        "sources" : {
+        },
+        "layers" : [
+            {
+                    "id": "background",
+                    "type": "background",
+                    "layout": {
+                        "visibility": "visible"
+                    },
+                    "paint": {
+                        "background-color": {
+                            "stops": [
+                                [
+                                    6,
+                                    "rgba(252, 247, 229, 1)"
+                                ],
+                                [
+                                    10,
+                                    "rgba(252, 247, 229, 1)"
+                                ],
+                                [
+                                    14,
+                                    "rgba(246, 241, 229, 1)"
+                                ],
+                                [
+                                    15,
+                                    "rgba(246, 241, 229, 1)"
+                                ]
+                            ]
+                        }
+                    }
+                }
+            
+        ]
+    }, // stylesheet location
     center: [35.078096, 31.4411522], // starting position [lng, lat]
     zoom: 7 // starting zoom
     });
+let israelGJ = {
+    "type": "FeatureCollection",
+    "features": []
+  }
+
+async function onMapLoad(){
+    map.addSource('israelBG', {
+        'type': 'geojson',
+        'data': israelGJ
+    });
+    
+    map.addLayer({
+        'id': 'israelBG',
+        'type': 'fill',
+        'source': 'israelBG',
+        'layout': {},
+        'paint': {
+        'fill-color': '#fff',
+        'fill-opacity': 0.8
+        }
+    });
+    loadBG()
+}
+async function loadBG(){
+    const BGresponse = await fetch('israel.fgb');
+    for await (let feature of flatgeobuf.deserialize(BGresponse.body, undefined)) {
+
+        israelGJ.features.push(feature)
+        let sourceObject = map.getSource('israelBG');
+        sourceObject.setData(israelGJ)
+    }
+    fetch("elections.json")
+    .then(res => res.json())
+    .then(data => {
+        results2021 = data;
+        addLayer()
+    })
+}
+map.on('load',onMapLoad)
+
 
 let results2021;
-fetch("elections.json")
-.then(res => res.json())
-.then(data => {
-    results2021 = data;
-    addLayer()
-})
+
 
 function addLayer(){
 
