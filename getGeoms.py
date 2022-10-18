@@ -1,14 +1,14 @@
-import pandas as pd
-import requests as rq
-import json
+from pandas import read_csv
+from requests import get
+from json import dump
 
-data = pd.read_csv("election_results.csv")
+data = read_csv("election_results.csv")
 base_obj = {"type": "FeatureCollection", "features": []}
 for i in range(0,len(data)):
     try:
         #url = "http://localhost:8083/search.php?q={}&extratags=1&namedetails=1&accept-language=he-il&dedupe=0&addressdetails=1&format=json&polygon_text=1".format(data.iloc[i,1])
         url = "https://services2.arcgis.com/xMRYm7cNgdR5RN6F/arcgis/rest/services/DemogSetl_2013/FeatureServer/0/query?where=SEMEL_YISHUV={}&returnGeometry=true&geometryPrecision=8&outSR=4326&f=pgeojson".format(data.iloc[i,2])
-        res = rq.get(url)
+        res = get(url)
         gj = res.json()
         if "features" in gj and len(gj["features"]) > 0:
             feature = gj["features"][0]
@@ -37,5 +37,5 @@ for i in range(0,len(data)):
         print(e)
 
 with open('sets2.geojson', 'w') as json_file:
-  json.dump(base_obj, json_file)
+  dump(base_obj, json_file)
 

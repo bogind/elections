@@ -65,7 +65,7 @@ async function onMapLoad(){
         'fill-color': '#fff',
         'fill-opacity': 0.8
         }
-    });
+    });        
     loadBG()
 }
 async function loadBG(){
