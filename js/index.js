@@ -1,6 +1,8 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
+const showBorders = urlParams.get('border') ? urlParams.get('border') : 0;
+const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 var map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -19,22 +21,10 @@ var map = new maplibregl.Map({
                     "paint": {
                         "background-color": {
                             "stops": [
-                                [
-                                    6,
-                                    "rgba(252, 247, 229, 1)"
-                                ],
-                                [
-                                    10,
-                                    "rgba(252, 247, 229, 1)"
-                                ],
-                                [
-                                    14,
-                                    "rgba(246, 241, 229, 1)"
-                                ],
-                                [
-                                    15,
-                                    "rgba(246, 241, 229, 1)"
-                                ]
+                                [6,"rgba(252, 247, 229, 1)"],
+                                [10,"rgba(252, 247, 229, 1)"],
+                                [14,"rgba(246, 241, 229, 1)"],
+                                [15,"rgba(246, 241, 229, 1)"]
                             ]
                         }
                     }
@@ -55,17 +45,45 @@ async function onMapLoad(){
         'type': 'geojson',
         'data': israelGJ
     });
-    
+    let polygonPaint = {
+        'fill-color': '#fff',
+        'fill-opacity': 0.8
+        }
+    let polygonFilter = ['==', 'name', 'dissolved']
+    if(showBorders == 1){
+        polygonPaint = {
+            'fill-color': ['match',
+                            ['get', 'name'],
+                            'israel',
+                            '#fff',
+                            '#a4a4a4'],
+            'fill-opacity': 0.8
+            }
+        polygonFilter = ['!=', 'name', 'dissolved']
+    }
     map.addLayer({
         'id': 'israelBG',
         'type': 'fill',
         'source': 'israelBG',
         'layout': {},
-        'paint': {
-        'fill-color': '#fff',
-        'fill-opacity': 0.8
-        }
+        'paint': polygonPaint,
+        'filter': polygonFilter
     });
+    if(showBorders == 1){
+        map.addLayer({
+            'id': 'israelBG-line',
+            'type': 'line',
+            'source': 'israelBG',
+            'layout': {},
+            'paint': {
+            'line-color': '#000',
+            'line-opacity': 0.9,
+            'line-dasharray': [4, 2]
+            },
+            'filter': ['!=', 'name', 'dissolved']
+        });
+    }
+    
     loadBG()
 }
 async function loadBG(){
