@@ -121,9 +121,11 @@ function addLayer(){
         geojson.features.forEach((feature) => {
         var partyForFeature = parties[feature.properties.max_party];
         if (partyForFeature) {
-            
-      // add stats to the feature's properties
-        feature.properties = Object.assign(feature.properties, partyForFeature);
+        feature.properties.Color = partyForFeature[0].Color;
+        feature.properties.Name = partyForFeature[0].Name;
+
+
+        //feature.properties = Object.assign(feature.properties, partyForFeature);
     }
   });
 
@@ -143,7 +145,7 @@ function addLayer(){
 
         // Get the `fill-extrusion-color` from the source `color` property.
         // 'fill-extrusion-color': ['match', 'color'],
-        'fill-extrusion-color': ['get', 'color'], 
+        'fill-extrusion-color': ['get', 'Color'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
         'fill-extrusion-height': 500,
@@ -176,7 +178,7 @@ function addInteractions(){
         console.log(feature)
         var center = turf.centroid(feature.geometry);
         var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
-        description += `${tr(1,ln)} : ${feature.properties.max_party}<br>`
+        description += `${tr(1,ln)} : ${feature.properties.Name}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
