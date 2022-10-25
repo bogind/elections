@@ -1,6 +1,7 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
+
 var map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -65,7 +66,7 @@ async function onMapLoad(){
         'fill-color': '#fff',
         'fill-opacity': 0.8
         }
-    });        
+    });
     loadBG()
 }
 async function loadBG(){
@@ -76,54 +77,96 @@ async function loadBG(){
         let sourceObject = map.getSource('israelBG');
         sourceObject.setData(israelGJ)
     }
-    fetch("elections.json")
-    .then(res => res.json())
-    .then(data => {
-        results2021 = data;
-        addLayer()
-    })
+
+
+    Promise.all([
+        fetch("elections.json").then(value => value.json()),
+        fetch("parties.json").then(value => value.json())
+        ]).then(allResponses => {
+            results2021 = allResponses[0]
+            parties = allResponses[1]
+            addLayer()
+          })
+
+
+    // fetch("elections.json")
+    // .then(res => res.json())
+    // .then(data => {
+    //     results2021 = data;
+    // })
+    // fetch("parties.json")
+    // .then(res => res.json())
+    // .then(data => {
+    //     parties = data;
+    // })
+
 }
 map.on('load',onMapLoad)
 
 
+
+let parties
 let results2021;
 
 
 function addLayer(){
 
+    var geojson = addPariesInfo(results2021.citiesData.results, parties);
     map.addSource('results', {
-        'type': 'geojson',
-        'data': results2021.citiesData.results//results2021.neighbourhoodsData.results
-        });
+    'type': 'geojson',
+    'data': geojson
+    });
 
+    function addPariesInfo(geojson, parties) {
+        geojson.features.forEach((feature) => {
+        var partyForFeature = parties[feature.properties.max_party];
+        if (partyForFeature) {
+            
+      // add stats to the feature's properties
+        feature.properties = Object.assign(feature.properties, partyForFeature);
+    }
+  });
+
+  return geojson;
+}
+
+    // map.addSource('results', {
+    //     'type': 'geojson',
+    //     'data': results2021.citiesData.results//results2021.neighbourhoodsData.results
+    //     });
     map.addLayer({
         'id': 'results',
-        'type': 'fill',
+        'type': 'fill-extrusion',
         'source': 'results',
         'layout': {},
         'paint': {
-        'fill-color': '#088',
-        'fill-opacity': 0.8
-        }
-    });
-    map.addLayer({
-        'id': 'room-extrusion',
-        'type': 'fill-extrusion',
-        'source': 'israelBG',
-        'paint': {
+
         // Get the `fill-extrusion-color` from the source `color` property.
-        'fill-extrusion-color': 'blue',
+        // 'fill-extrusion-color': ['match', 'color'],
+        'fill-extrusion-color': ['get', 'color'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
-        'fill-extrusion-height': 50,
+        'fill-extrusion-height': 500,
          
         // Get `fill-extrusion-base` from the source `base_height` property.
-        'fill-extrusion-base': 5,
+        'fill-extrusion-base': 50,
          
         // Make extrusions slightly opaque to see through indoor walls.
         'fill-extrusion-opacity': 0.5
         }
-        });
+        });  
+
+    // map.addLayer({
+    //     'id': 'results',
+    //     'type': 'fill',
+    //     'source': 'results',
+    //     'layout': {},
+    //     'paint': {
+    //     'fill-color': '#088',
+    //     'fill-opacity': 0.8
+    //     }
+    // });
+
     addInteractions()
 }
 
