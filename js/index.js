@@ -194,13 +194,16 @@ function addInteractions(){
     map.on('click', 'results', function (e) {
         var feature = e.features[0];
         console.log(feature)
+        gtag('event', 'set_click', {
+            'set_id': feature.id
+          });
+          
         var center = turf.centroid(feature.geometry);
         var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
         description += `${tr(1,ln)} : ${feature.properties.Name}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
-        console.log(props)
         keys = Object.keys(props)
         values = Object.values(props)
         var data = []
