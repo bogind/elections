@@ -105,19 +105,6 @@ async function loadBG(){
             parties = allResponses[1]
             addLayer()
           })
-
-
-    // fetch("elections.json")
-    // .then(res => res.json())
-    // .then(data => {
-    //     results2021 = data;
-    // })
-    // fetch("parties.json")
-    // .then(res => res.json())
-    // .then(data => {
-    //     parties = data;
-    // })
-
 }
 map.on('load',onMapLoad)
 
@@ -143,17 +130,11 @@ function addLayer(){
         feature.properties.Name = partyForFeature[0].Name;
 
 
-        //feature.properties = Object.assign(feature.properties, partyForFeature);
     }
   });
 
   return geojson;
 }
-
-    // map.addSource('results', {
-    //     'type': 'geojson',
-    //     'data': results2021.citiesData.results//results2021.neighbourhoodsData.results
-    //     });
     map.addLayer({
         'id': 'results',
         'type': 'fill-extrusion',
@@ -176,17 +157,7 @@ function addLayer(){
         }
         });  
 
-    // map.addLayer({
-    //     'id': 'results',
-    //     'type': 'fill',
-    //     'source': 'results',
-    //     'layout': {},
-    //     'paint': {
-    //     'fill-color': '#088',
-    //     'fill-opacity': 0.8
-    //     }
-    // });
-
+    
     addInteractions()
 }
 
@@ -194,16 +165,13 @@ function addInteractions(){
     map.on('click', 'results', function (e) {
         var feature = e.features[0];
         console.log(feature)
-        gtag('event', 'set_click', {
-            'set_id': feature.id
-          });
-          
         var center = turf.centroid(feature.geometry);
         var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
         description += `${tr(1,ln)} : ${feature.properties.Name}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
+        console.log(props)
         keys = Object.keys(props)
         values = Object.values(props)
         var data = []
