@@ -100,12 +100,10 @@ async function loadBG(){
     Promise.all([
         fetch("elections.json").then(value => value.json()),
         fetch("parties.json").then(value => value.json()),
-        fetch("partyName.json").then(value => value.json())
 
         ]).then(allResponses => {
             results2021 = allResponses[0]
             partyColor = allResponses[1]
-            partyName = allResponses[2]
             addLayer()
           })
 }
@@ -115,25 +113,22 @@ map.on('load',onMapLoad)
 
 let partyColor
 let results2021;
-let partyName
 
 
 function addLayer(){
 
-    var geojson = addPariesInfo(results2021.citiesData.results, partyColor,partyName);
+    var geojson = addPariesInfo(results2021.citiesData.results, partyColor);
     map.addSource('results', {
     'type': 'geojson',
     'data': geojson
     });
 
-    function addPariesInfo(geojson, partyColor,partyName) {
+    function addPariesInfo(geojson, partyColor) {
         geojson.features.forEach((feature) => {
         var partyColorForFeature = partyColor[feature.properties.max_party];
-        var partyNameForFeature = partyName[feature.properties.max_party];
-        if (partyNameForFeature) {
-        feature.properties.Color = partyColorForFeature[0].Color;
-        //Need to put the language "name" as input
-        feature.properties.Name = partyNameForFeature[0].he;
+        if (partyColorForFeature) {
+            feature.properties.Color = partyColorForFeature[0].Color;
+            feature.properties.Name = tr(feature.properties.max_party,ln);
 
 
     }
