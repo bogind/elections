@@ -144,7 +144,6 @@ function addLayer(){
         'paint': {
 
         // Get the `fill-extrusion-color` from the source `color` property.
-        // 'fill-extrusion-color': ['match', 'color'],
         'fill-extrusion-color': ['get', 'Color'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
