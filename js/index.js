@@ -4,6 +4,7 @@ const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 const showBorders = urlParams.get('border') ? urlParams.get('border') : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
+     
 var map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -127,9 +128,9 @@ function addLayer(){
         geojson.features.forEach((feature) => {
         var partyColorForFeature = partyColor[feature.properties.max_party];
         if (partyColorForFeature) {
-            feature.properties.Color = partyColorForFeature.Color;
-            feature.properties.Name = tr(feature.properties.max_party,ln);
-            feature.properties.Height = feature.properties.votingPercentage * 500
+            feature.properties.partyColor = partyColorForFeature.Color;
+            feature.properties.partyName = tr(feature.properties.max_party,ln);
+            feature.properties.cityVotingHeight = feature.properties.votingPercentage * 500
 
 
     }
@@ -145,10 +146,10 @@ function addLayer(){
         'paint': {
 
         // Get the `fill-extrusion-color` from the source `color` property.
-        'fill-extrusion-color': ['get', 'Color'], 
+        'fill-extrusion-color': ['get', 'partyColor'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
-        'fill-extrusion-height': ['get', 'Height'],
+        'fill-extrusion-height': ['get', 'cityVotingHeight'],
           
             
          
@@ -159,7 +160,38 @@ function addLayer(){
         'fill-extrusion-opacity': 0.5
         }
         });  
-
+        map.addLayer({
+            id: "trailheads-symbol",
+            type: "symbol",
+            source: "results",
+            layout: {
+  
+              "text-font": ["Arial Italic"],
+              "text-field": ["get", "areaId"],
+              "text-size": 12,
+              "text-anchor": "bottom",
+              "text-offset": [0, -2]
+  
+            },
+            paint: {
+              "text-color": "white",
+              "text-halo-color": "seagreen",
+              "text-halo-width": 2
+  
+            }
+          });
+        // map.setLayoutProperty('results', 'text-field', [
+        //     'format',
+        //     ['get', 'areaId'],
+        //     { 'font-scale': 1.2 },
+        //     {
+        //     'font-scale': 0.8,
+        //     'text-font': [
+        //     'literal',
+        //     ['David', 'Arial Unicode MS Regular']
+        //     ]
+        //     }
+        //     ]);
     
     addInteractions()
 }
@@ -170,7 +202,7 @@ function addInteractions(){
         console.log(feature)
         var center = turf.centroid(feature.geometry);
         var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
-        description += `${tr(1,ln)} : ${feature.properties.Name}<br>`
+        description += `${tr(1,ln)} : ${feature.properties.partyName}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
