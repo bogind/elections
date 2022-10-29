@@ -7,13 +7,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DEET0J4MVP"></script>
     <script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-DEET0J4MVP');</script>
     <script src="https://unpkg.com/flatgeobuf@3.22.0/dist/flatgeobuf-geojson.min.js"></script>
-    <script>
-        maplibregl.setRTLTextPlugin(
-        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
-        null,
-        true // Lazy load the plugin
-        );
-    </script>        
+      
     <script src="https://unpkg.com/json-formatter-js"></script>
     <script src="./js/plotly-2.11.1.min.js"></script>
     <script src="./js/d3@7.js"></script>
@@ -22,7 +16,13 @@
     <script src="./js/tr.js"></script>
     <script src="./js/turf.min.js"></script>
     <script src="./js/maplibre-gl.js"></script>
-
+    <script>
+        maplibregl.setRTLTextPlugin(
+        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
+        null,
+        true // Lazy load the plugin
+        );
+            </script>  
     <link rel="stylesheet" href="./css/maplibre-gl.css">
     <link rel="stylesheet" href="./css/styles.css">
     
