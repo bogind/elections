@@ -127,7 +127,7 @@ function addLayer(){
         geojson.features.forEach((feature) => {
         var partyColorForFeature = partyColor[feature.properties.max_party];
         if (partyColorForFeature) {
-            feature.properties.Color = partyColorForFeature[0].Color;
+            feature.properties.Color = partyColorForFeature.Color;
             feature.properties.Name = tr(feature.properties.max_party,ln);
 
 
