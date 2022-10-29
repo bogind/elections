@@ -129,6 +129,7 @@ function addLayer(){
         if (partyColorForFeature) {
             feature.properties.Color = partyColorForFeature.Color;
             feature.properties.Name = tr(feature.properties.max_party,ln);
+            feature.properties.Height = feature.properties.votingPercentage * 500
 
 
     }
@@ -147,7 +148,9 @@ function addLayer(){
         'fill-extrusion-color': ['get', 'Color'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
-        'fill-extrusion-height': 500,
+        'fill-extrusion-height': ['get', 'Height'],
+          
+            
          
         // Get `fill-extrusion-base` from the source `base_height` property.
         'fill-extrusion-base': 50,
