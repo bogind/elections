@@ -201,7 +201,7 @@ function addInteractions(){
         var feature = e.features[0];
         console.log(feature)
         var center = turf.centroid(feature.geometry);
-        var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
+        var description = `<h2>${tr(feature.properties.areaId.trim(),ln)}</h2>`;
         description += `${tr(1,ln)} : ${feature.properties.partyName}<br>`
         description += '<div id="plot">'
 
