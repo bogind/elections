@@ -132,8 +132,7 @@ function addLayer(){
         var partyNameForFeature = partyName[feature.properties.max_party];
         if (partyNameForFeature) {
         feature.properties.Color = partyColorForFeature[0].Color;
-        //Need to put the language "name" as input
-        feature.properties.Name = partyNameForFeature[0].he;
+        feature.properties.Name = partyNameForFeature[0].Name;
 
 
     }
