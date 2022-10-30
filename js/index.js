@@ -127,11 +127,11 @@ function addLayer(){
     function addPariesInfo(geojson, partyColor) {
         geojson.features.forEach((feature) => {
         var partyColorForFeature = partyColor[feature.properties.max_party];
+
         if (partyColorForFeature) {
             feature.properties.partyColor = partyColorForFeature.Color;
             feature.properties.partyName = tr(feature.properties.max_party,ln);
             feature.properties.cityVotingHeight = feature.properties.votingPercentage * 500
-
 
     }
   });
