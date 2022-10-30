@@ -1,9 +1,10 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
+let ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 const showBorders = urlParams.get('border') ? urlParams.get('border') : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
+     
 var map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -100,12 +101,10 @@ async function loadBG(){
     Promise.all([
         fetch("elections.json").then(value => value.json()),
         fetch("parties.json").then(value => value.json()),
-        fetch("partyName.json").then(value => value.json())
 
         ]).then(allResponses => {
             results2021 = allResponses[0]
             partyColor = allResponses[1]
-            partyName = allResponses[2]
             addLayer()
           })
 }
@@ -115,25 +114,24 @@ map.on('load',onMapLoad)
 
 let partyColor
 let results2021;
-let partyName
 
 
 function addLayer(){
 
-    var geojson = addPariesInfo(results2021.citiesData.results, partyColor,partyName);
+    var geojson = addPariesInfo(results2021.citiesData.results, partyColor);
     map.addSource('results', {
     'type': 'geojson',
     'data': geojson
     });
 
-    function addPariesInfo(geojson, partyColor,partyName) {
+    function addPariesInfo(geojson, partyColor) {
         geojson.features.forEach((feature) => {
         var partyColorForFeature = partyColor[feature.properties.max_party];
-        var partyNameForFeature = partyName[feature.properties.max_party];
-        if (partyNameForFeature) {
-        feature.properties.Color = partyColorForFeature[0].Color;
-        feature.properties.Name = partyNameForFeature[0].Name;
 
+        if (partyColorForFeature) {
+            feature.properties.partyColor = partyColorForFeature.Color;
+            feature.properties.partyName = tr(feature.properties.max_party,ln);
+            feature.properties.cityVotingHeight = feature.properties.votingPercentage * 500
 
     }
   });
@@ -148,11 +146,12 @@ function addLayer(){
         'paint': {
 
         // Get the `fill-extrusion-color` from the source `color` property.
-        // 'fill-extrusion-color': ['match', 'color'],
-        'fill-extrusion-color': ['get', 'Color'], 
+        'fill-extrusion-color': ['get', 'partyColor'], 
          
         // Get `fill-extrusion-height` from the source `height` property.
-        'fill-extrusion-height': 500,
+        'fill-extrusion-height': ['get', 'cityVotingHeight'],
+          
+            
          
         // Get `fill-extrusion-base` from the source `base_height` property.
         'fill-extrusion-base': 50,
@@ -161,7 +160,38 @@ function addLayer(){
         'fill-extrusion-opacity': 0.5
         }
         });  
-
+        map.addLayer({
+            id: "trailheads-symbol",
+            type: "symbol",
+            source: "results",
+            layout: {
+  
+              "text-font": ["Arial Italic"],
+              "text-field": ["get", "areaId"],
+              "text-size": 12,
+              "text-anchor": "bottom",
+              "text-offset": [0, -2]
+  
+            },
+            paint: {
+              "text-color": "white",
+              "text-halo-color": "seagreen",
+              "text-halo-width": 2
+  
+            }
+          });
+        // map.setLayoutProperty('results', 'text-field', [
+        //     'format',
+        //     ['get', 'areaId'],
+        //     { 'font-scale': 1.2 },
+        //     {
+        //     'font-scale': 0.8,
+        //     'text-font': [
+        //     'literal',
+        //     ['David', 'Arial Unicode MS Regular']
+        //     ]
+        //     }
+        //     ]);
     
     addInteractions()
 }
@@ -171,8 +201,10 @@ function addInteractions(){
         var feature = e.features[0];
         console.log(feature)
         var center = turf.centroid(feature.geometry);
-        var description = `<h2>${feature.properties.areaId.trim()}</h2>`;
-        description += `${tr(1,ln)} : ${feature.properties.Name}<br>`
+        console.log(feature.properties.partyName)
+        var description = `<h2>${tr(feature.properties.areaId.trim(),ln)}</h2>`;
+        
+        description += `${tr("mostVotesPartyString",ln)} : ${tr(feature.properties.max_party,ln)}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
@@ -244,3 +276,49 @@ function setDirection(ln){
         popupContentStyle.direction = "left"
     }
 }
+
+class languageSelectionButtons {
+    onAdd(map){
+      this.map = map;
+      this.container = document.createElement('div');
+      this.hebBtn = document.createElement('a');
+      this.hebBtn.textContent = " Hebrew |"
+      this.enBtn = document.createElement('a');
+      this.enBtn.textContent = " English |"
+      this.arBtn = document.createElement('a');
+      this.arBtn.textContent = " Arabic |"
+      this.rusBtn = document.createElement('a');
+      this.rusBtn.textContent = " Russian"
+      this.container.appendChild(this.hebBtn)
+      this.container.appendChild(this.enBtn)
+      this.container.appendChild(this.arBtn)
+      this.container.appendChild(this.rusBtn)
+      this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+      this.hebBtn.className = 'langBtn'
+      this.enBtn.className = 'langBtn'
+      this.arBtn.className = 'langBtn'
+      this.rusBtn.className = 'langBtn'
+      changeLanguge(this.hebBtn,'he');
+      changeLanguge(this.enBtn,'en');
+      changeLanguge(this.arBtn,'ar');
+      changeLanguge(this.rusBtn,'ru');
+        function changeLanguge(clickablearea,languageChange) {
+            clickablearea.addEventListener("click", () => {
+                ln = languageChange;
+            });
+
+        }
+
+
+        return this.container;
+
+    }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+  }
+
+  let myCustomControl = new languageSelectionButtons();
+
+  map.addControl(myCustomControl);

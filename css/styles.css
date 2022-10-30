@@ -7,3 +7,21 @@
     margin-right: auto;
     width: 50%;
 }
+.langBtn{
+    cursor: pointer;
+    color:gray;
+    text-shadow : horizontal-shadow vertical-shadow blur color;
+}
+/* .mapboxgl-ctrl{
+    width: 400px;
+    height: 400px;
+    top: 0;
+    left: 0;
+} */
+
+/* .custom-control-class{
+    width: 400px;
+    height: 400px;
+    top: 0;
+    left: 0;
+} */
