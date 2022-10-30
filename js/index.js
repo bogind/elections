@@ -1,6 +1,6 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-const ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
+let ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 const showBorders = urlParams.get('border') ? urlParams.get('border') : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
@@ -201,8 +201,10 @@ function addInteractions(){
         var feature = e.features[0];
         console.log(feature)
         var center = turf.centroid(feature.geometry);
+        console.log(feature.properties.partyName)
         var description = `<h2>${tr(feature.properties.areaId.trim(),ln)}</h2>`;
-        description += `${tr(1,ln)} : ${feature.properties.partyName}<br>`
+        
+        description += `${tr("mostVotesPartyString",ln)} : ${tr(feature.properties.max_party,ln)}<br>`
         description += '<div id="plot">'
 
         props = JSON.parse(feature.properties.electionsResults)
@@ -274,3 +276,49 @@ function setDirection(ln){
         popupContentStyle.direction = "left"
     }
 }
+
+class languageSelectionButtons {
+    onAdd(map){
+      this.map = map;
+      this.container = document.createElement('div');
+      this.hebBtn = document.createElement('a');
+      this.hebBtn.textContent = " Hebrew |"
+      this.enBtn = document.createElement('a');
+      this.enBtn.textContent = " English |"
+      this.arBtn = document.createElement('a');
+      this.arBtn.textContent = " Arabic |"
+      this.rusBtn = document.createElement('a');
+      this.rusBtn.textContent = " Russian"
+      this.container.appendChild(this.hebBtn)
+      this.container.appendChild(this.enBtn)
+      this.container.appendChild(this.arBtn)
+      this.container.appendChild(this.rusBtn)
+      this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+      this.hebBtn.className = 'langBtn'
+      this.enBtn.className = 'langBtn'
+      this.arBtn.className = 'langBtn'
+      this.rusBtn.className = 'langBtn'
+      changeLanguge(this.hebBtn,'he');
+      changeLanguge(this.enBtn,'en');
+      changeLanguge(this.arBtn,'ar');
+      changeLanguge(this.rusBtn,'ru');
+        function changeLanguge(clickablearea,languageChange) {
+            clickablearea.addEventListener("click", () => {
+                ln = languageChange;
+            });
+
+        }
+
+
+        return this.container;
+
+    }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+  }
+
+  let myCustomControl = new languageSelectionButtons();
+
+  map.addControl(myCustomControl);
