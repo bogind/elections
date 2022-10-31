@@ -3,7 +3,7 @@ const urlParams = new URLSearchParams(queryString);
 let ln = urlParams.get('ln') ? urlParams.get('ln') : "he";
 const showBorders = urlParams.get('border') ? urlParams.get('border') : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
-
+let results = 0
      
 var map = new maplibregl.Map({
     container: 'map',
@@ -101,10 +101,13 @@ async function loadBG(){
     Promise.all([
         fetch("elections.json").then(value => value.json()),
         fetch("parties.json").then(value => value.json()),
+        fetch("national.json").then(value => value.json()),
 
         ]).then(allResponses => {
+            
             results2021 = allResponses[0]
             partyColor = allResponses[1]
+            results = runCalc(allResponses[2])
             addLayer()
           })
 }
@@ -202,7 +205,7 @@ function addInteractions(){
         console.log(feature)
         var center = turf.centroid(feature.geometry);
         console.log(feature.properties.partyName)
-        var description = `<h2>${tr(feature.properties.areaId.trim(),ln)}</h2>`;
+        var description = `<h2>${tr(feature.properties.id,ln)}</h2>`;
         
         description += `${tr("mostVotesPartyString",ln)} : ${tr(feature.properties.max_party,ln)}<br>`
         description += '<div id="plot">'
@@ -271,11 +274,126 @@ function addInteractions(){
 }
 
 function setDirection(ln){
-    if(ln != "he"){
+    if(ln != "he" || "ar" ){
         const popupContentStyle = document.querySelector('.maplibregl-popup-content');
         popupContentStyle.direction = "left"
     }
 }
+function returnPlot(){
+    let plotData = {},
+    x =[],
+    y =[]
+    for (let index = 0; index < results.length; index++) {
+        let element = results[index];
+        if (element.aboveBlockPercent) {
+            x.push(element.partyName)
+            y.push(element.mandatesByVotes)         
+        }
+
+        //plotData({x:[].push(element.partyName),y:[].push(element.votes)})
+        
+    }
+    plotData=[{x,y,type:"bar"}]
+    Plotly.newPlot('hiddenContent', plotData);
+    
+}
+
+class displayNationtalScore {
+    onAdd(map){
+        this.map = map;
+        
+        this.container = document.createElement('div');
+        this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+
+        this.nationtalScore = document.createElement('button');
+        this.nationtalScore.className = "nationalResultsBtn"
+        this.nationtalScore.textContent = tr("nationalResults",ln)
+
+        this.container.appendChild(this.nationtalScore)
+
+        this.slider = document.createElement("div")
+        this.slider.id = "slider"
+        this.slider.className = "slide-up"
+
+        this.container.appendChild(this.slider)
+
+        this.filler = document.createElement("div")
+
+        this.slider.appendChild(this.filler)
+
+        this.contants = document.createElement("div")
+        this.contants.className = "contents"
+        this.contants.id = "hiddenContent"
+
+        this.slider.appendChild(this.contants)
+
+        const slider = this.slider
+        const contants = this.contants
+        
+        //var result = Object.keys(results).map((key) => [key, results[key]]);
+
+        
+        this.nationtalScore.addEventListener("click", function() {
+            slider.classList.toggle("slide-down")
+            returnPlot()
+                
+                // showNationalResults(contants)
+            
+        });
+
+        
+        return this.container;
+    }
+    // onAdd(map){
+    //     this.map = map;
+        
+    //     this.container = document.createElement('div');
+    //     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+
+    //     this.nationtalScore = document.createElement('button');
+    //     this.nationtalScore.className = "nationalResultsBtn"
+    //     this.nationtalScore.textContent = tr("nationalResults",ln)
+
+    //     this.container.appendChild(this.nationtalScore)
+
+    //     this.slider = document.createElement("div")
+    //     this.slider.id = "slider"
+    //     this.slider.className = "slide-up"
+
+    //     this.container.appendChild(this.slider)
+
+    //     this.filler = document.createElement("div")
+
+    //     this.slider.appendChild(this.filler)
+
+    //     this.contants = document.createElement("p")
+    //     this.contants.className = "contents"
+    //     this.contants.textContent = "teset"
+
+    //     this.slider.appendChild(this.contants)
+
+    //     const slider = this.slider
+    //     this.nationtalScore.addEventListener("click", function() {
+    //             //let silder = document.getElementById("slider");
+        
+    //             slider.classList.toggle("slide-down")
+            
+    //     //     //let results = calcMandates()
+    //     });
+
+        
+    //     return this.container;
+    // }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+    
+  }
+
+  let myDisplayNationtalScore = new displayNationtalScore();
+
+  map.addControl(myDisplayNationtalScore);
 
 class languageSelectionButtons {
     onAdd(map){
@@ -319,6 +437,7 @@ class languageSelectionButtons {
     }
   }
 
-  let myCustomControl = new languageSelectionButtons();
+  let myLanguageSelectionButtons = new languageSelectionButtons();
 
-  map.addControl(myCustomControl);
+  map.addControl(myLanguageSelectionButtons,position = 'top-left');
+
