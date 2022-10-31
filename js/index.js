@@ -107,7 +107,7 @@ map.on("load", onMapLoad);
 let partyColor;
 let results2021;
 
-function addPariesInfo(geojson, partyColor) {
+function addPartiesInfo(geojson, partyColor) {
   geojson.features.forEach((feature) => {
     var partyColorForFeature = partyColor[feature.properties.max_party];
 
@@ -116,6 +116,7 @@ function addPariesInfo(geojson, partyColor) {
       feature.properties.partyName = tr(feature.properties.max_party, ln);
       feature.properties.cityVotingHeight =
         feature.properties.votingPercentage * 500;
+        //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
     }
   });
 
@@ -123,7 +124,7 @@ function addPariesInfo(geojson, partyColor) {
 }
 
 function addLayer() {
-  var geojson = addPariesInfo(results2021.citiesData.results, partyColor);
+  var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
   map.addSource("results", {
     type: "geojson",
     data: geojson,
@@ -295,6 +296,7 @@ class languageSelectionButtons {
     function changeLanguge(clickablearea, languageChange) {
       clickablearea.addEventListener("click", () => {
         ln = languageChange;
+        setDirection(ln);
       });
     }
 
