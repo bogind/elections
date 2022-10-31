@@ -334,8 +334,19 @@ class displayNationtalScore {
 
         
         this.nationtalScore.addEventListener("click", function() {
-            slider.classList.toggle("slide-down")
-            returnPlot()
+
+            if (window.getComputedStyle(slider).getPropertyValue("display") == "none") {
+                console.log("up")
+                slider.classList.toggle("slide-down")
+                returnPlot()
+                slider.style.display = "block";
+              }
+              else if (window.getComputedStyle(slider).getPropertyValue("display") == "block") {
+                console.log("down")
+                slider.style.display = "none";
+              }
+        
+             
                 
                 // showNationalResults(contants)
             
