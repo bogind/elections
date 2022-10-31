@@ -9,8 +9,7 @@ var map = new maplibregl.Map({
     container: 'map',
     style: {
         "version" : 8,
-        "sprite" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/sprites/sprite",
-        "glyphs" : "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/{fontstack}/{range}.pbf",
+        "glyphs":"https://bogind.github.io/glfonts/{fontstack}/{range}.pbf",
         "sources" : {
         },
         "layers" : [
@@ -115,6 +114,20 @@ map.on('load',onMapLoad)
 let partyColor
 let results2021;
 
+function addPariesInfo(geojson, partyColor) {
+    geojson.features.forEach((feature) => {
+    var partyColorForFeature = partyColor[feature.properties.max_party];
+
+    if (partyColorForFeature) {
+        feature.properties.partyColor = partyColorForFeature.Color;
+        feature.properties.partyName = tr(feature.properties.max_party,ln);
+        feature.properties.cityVotingHeight = feature.properties.votingPercentage * 500
+
+}
+});
+
+return geojson;
+}
 
 function addLayer(){
 
@@ -124,20 +137,7 @@ function addLayer(){
     'data': geojson
     });
 
-    function addPariesInfo(geojson, partyColor) {
-        geojson.features.forEach((feature) => {
-        var partyColorForFeature = partyColor[feature.properties.max_party];
-
-        if (partyColorForFeature) {
-            feature.properties.partyColor = partyColorForFeature.Color;
-            feature.properties.partyName = tr(feature.properties.max_party,ln);
-            feature.properties.cityVotingHeight = feature.properties.votingPercentage * 500
-
-    }
-  });
-
-  return geojson;
-}
+    
     map.addLayer({
         'id': 'results',
         'type': 'fill-extrusion',
@@ -161,24 +161,25 @@ function addLayer(){
         }
         });  
         map.addLayer({
-            id: "trailheads-symbol",
+            id: "labels-symbol",
             type: "symbol",
             source: "results",
             layout: {
   
-              "text-font": ["Arial Italic"],
+              "text-font": ["Noto Sans Regular"],
               "text-field": ["get", "areaId"],
-              "text-size": 12,
+              "text-size": 16,
               "text-anchor": "bottom",
               "text-offset": [0, -2]
   
             },
             paint: {
-              "text-color": "white",
-              "text-halo-color": "seagreen",
-              "text-halo-width": 2
+              "text-color": "black",
+              "text-halo-color": "white",
+              "text-halo-width": 1
   
-            }
+            },
+            'filter': ['in',  ["get", "areaId"],["literal", ['תל אביב יפו','ירושלים','חיפה','אילת','טבריה','באר שבע']]]
           });
         // map.setLayoutProperty('results', 'text-field', [
         //     'format',
