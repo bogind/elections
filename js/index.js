@@ -40,11 +40,19 @@ let israelGJ = {
     "type": "FeatureCollection",
     "features": []
   }
+let setsGJ = {
+    "type": "FeatureCollection",
+    "features": []
+  }
 
 async function onMapLoad(){
     map.addSource('israelBG', {
         'type': 'geojson',
         'data': israelGJ
+    });
+    map.addSource('sets', {
+        'type': 'geojson',
+        'data': setsGJ
     });
     let polygonPaint = {
         'fill-color': '#fff',
@@ -100,10 +108,12 @@ async function loadBG(){
     Promise.all([
         fetch("elections.json").then(value => value.json()),
         fetch("parties.json").then(value => value.json()),
+        fetch("sets4.geojson").then(value => value.json()),
 
         ]).then(allResponses => {
             results2021 = allResponses[0]
             partyColor = allResponses[1]
+            setsGJ = allResponses[2]
             addLayer()
           })
 }
