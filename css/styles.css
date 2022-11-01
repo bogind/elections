@@ -145,3 +145,9 @@
       height: 200px;  */
 
           }
+    .popup-content-rtl{
+        direction:rtl;
+    }
+    .popup-content-ltr{
+        direction:ltr;
+    }

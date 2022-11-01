@@ -264,8 +264,11 @@ function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
     var center = turf.centroid(feature.geometry);
-    var description = `<h2>${tr(feature.properties.lms_code, ln)}</h2>`;
-    //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+    if(ln != "he" && ln != "ar" ){
+      var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+    }else{
+      var description = `<div class="popup-content-rtl"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+    }
 
 
     description += `${tr("mostVotesPartyString", ln)} : ${tr(
@@ -311,14 +314,13 @@ function addInteractions() {
         r: 0,
       },
     };
+    
 
     new maplibregl.Popup({ maxWidth: "300px" })
       .setLngLat(center.geometry.coordinates)
       .setHTML(description)
       .addTo(map);
 
-    setDirection(ln);
-    console.log(data);
     Plotly.newPlot("plot", data, layout, {
       scrollZoom: false,
       displayModeBar: false,
@@ -335,12 +337,11 @@ function addInteractions() {
     map.getCanvas().style.cursor = "";
   });
 }
-function setDirection(ln){
-  if(ln != "he" || "ar" ){
-      const popupContentStyle = document.querySelector('.maplibregl-popup-content');
-      popupContentStyle.direction = "left"
-  }
+
+function updateLabelLang(ln){
+
 }
+
 function addNationalResultsPlot(){
   let plotData = {},
   x =[],
@@ -470,7 +471,11 @@ class languageSelectionButtons {
     this.container = document.createElement("div");
     this.container.id = "langBar";
     this.container.className =
-      "custom-control-class maplibregl-ctrl mapboxgl-ctrl";
+      "custom-control-class maplibregl-ctrl mapboxgl-ctrl popup-content-rtl";
+      if(ln != "he" &&  ln != "ar" ){
+          this.container.classList.remove('popup-content-rtl') 
+          this.container.classList.add('popup-content-ltr') 
+      }
     this.container.appendChild(createLangBtn(" Hebrew |", "he"));
     this.container.appendChild(createLangBtn(" English |", "en"));
     this.container.appendChild(createLangBtn(" Arabic |", "ar"));
@@ -485,7 +490,14 @@ class languageSelectionButtons {
     function changeLanguge(clickablearea, languageChange) {
       clickablearea.addEventListener("click", () => {
         ln = languageChange;
-        setDirection(ln);
+        if(ln != "he" &&  ln != "ar" ){
+          try {
+            this.container.classList.remove('popup-content-rtl')
+            
+          } catch (error) {
+            
+          }  
+        }
       });
     }
 
