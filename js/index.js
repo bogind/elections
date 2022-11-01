@@ -293,12 +293,15 @@ function addInteractions() {
     sortable.sort(function(a, b) {
         return a[1] - b[1];
     });
-    let keys = []
-    let values = []
+    let keys = [];
+    let values = [];
+    let colors = [];
     for(var k=0;k<sortable.length;k++){
-      keys.push(sortable[k][0])
+      keys.push(tr(sortable[k][0],ln))
       values.push(sortable[k][1])
+      colors.push(partyColor[sortable[k][0]].Color)
     }
+    console.log(colors)
     var data = [];
     for (var i = 0; i < keys.length; i++) {
       trace = {
@@ -308,6 +311,9 @@ function addInteractions() {
         orientation: "h",
         width: 0.5,
         type: "bar",
+        marker:{
+          color: colors[i]
+        },
       };
       data.push(trace);
     }
