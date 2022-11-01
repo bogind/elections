@@ -98,28 +98,28 @@ async function onMapLoad(){
     
     loadBG()
 }
-async function loadBG(){
-    const BGresponse = await fetch('israel.fgb');
-    for await (let feature of flatgeobuf.deserialize(BGresponse.body, undefined)) {
+// async function loadBG(){
+//     const BGresponse = await fetch('israel.fgb');
+//     for await (let feature of flatgeobuf.deserialize(BGresponse.body, undefined)) {
 
-        israelGJ.features.push(feature)
-        let sourceObject = map.getSource('israelBG');
-        sourceObject.setData(israelGJ)
-    }
+//         israelGJ.features.push(feature)
+//         let sourceObject = map.getSource('israelBG');
+//         sourceObject.setData(israelGJ)
+//     }
 
 
-    Promise.all([
-        fetch("elections.json").then(value => value.json()),
-        fetch("parties.json").then(value => value.json()),
-        fetch("sets4.geojson").then(value => value.json()),
+//     Promise.all([
+//         fetch("elections.json").then(value => value.json()),
+//         fetch("parties.json").then(value => value.json()),
+//         fetch("sets4.geojson").then(value => value.json()),
 
-        ]).then(allResponses => {
-            results2021 = allResponses[0]
-            partyColor = allResponses[1]
-            setsGJ = allResponses[2]
-            addLayer()
-          })
-}
+//         ]).then(allResponses => {
+//             results2021 = allResponses[0]
+//             partyColor = allResponses[1]
+//             setsGJ = allResponses[2]
+//             addLayer()
+//           })
+// }
 async function loadBG() {
   const BGresponse = await fetch("israel.fgb");
   for await (let feature of flatgeobuf.deserialize(
@@ -284,7 +284,6 @@ function addInteractions() {
     var feature = e.features[0];
     var center = turf.centroid(feature.geometry);
     var description = `<h2>${tr(feature.properties.lms_code, ln)}</h2>`;
-    //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
 
 
     description += `${tr("mostVotesPartyString", ln)} : ${tr(
