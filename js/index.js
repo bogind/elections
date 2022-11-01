@@ -522,25 +522,25 @@ let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
 
   map.addControl(mydisplayNationtalScoreBtn);
 
-//   class displayUpdateDate {
-//     onAdd(map){
-//         this.map = map;
+  // class displayUpdateDate {
+  //   onAdd(map){
+  //       this.map = map;
         
-//         this.container = document.createElement('div');
-//         this.container.className = 'updateDateBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
-//         this.container.textContent = "test"
+  //       this.container = document.createElement('div');
+  //       this.container.className = 'updateDateBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
+  //       this.container.textContent = results2022["updateDate"]
         
-//         return this.container;
-//     }
-//     onRemove(){
-//       this.container.parentNode.removeChild(this.container);
-//       this.map = undefined;
-//     }
+  //       return this.container;
+  //   }
+  //   onRemove(){
+  //     this.container.parentNode.removeChild(this.container);
+  //     this.map = undefined;
+  //   }
     
-//   }
+  // }
   
-//   let myUpdateDate = new displayUpdateDate();
+  // let myUpdateDate = new displayUpdateDate();
   
-//     map.addControl(myUpdateDate,'bottom-left');
+  //   map.addControl(myUpdateDate,'bottom-left');
   
   
