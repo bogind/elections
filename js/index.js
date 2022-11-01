@@ -267,7 +267,13 @@ function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
     var center = turf.centroid(feature.geometry);
-    var description = `<h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+    if(ln != "he" && ln != "ar" ){
+      //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+        var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+      }else{
+        var description = `<div class="popup-content-rtl"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+      }
+    
 
 
     description += `${tr("mostVotesPartyString", ln)} : ${tr(
@@ -419,7 +425,11 @@ class languageSelectionButtons {
     this.container = document.createElement("div");
     this.container.id = "langBar";
     this.container.className =
-      "custom-control-class maplibregl-ctrl mapboxgl-ctrl";
+    "custom-control-class maplibregl-ctrl mapboxgl-ctrl popup-content-rtl";
+    if(ln != "he" &&  ln != "ar" ){
+        this.container.classList.remove('popup-content-rtl') 
+        this.container.classList.add('popup-content-ltr') 
+    }
     this.container.appendChild(createLangBtn(" Hebrew |", "he"));
     this.container.appendChild(createLangBtn(" English |", "en"));
     this.container.appendChild(createLangBtn(" Arabic |", "ar"));
@@ -434,7 +444,15 @@ class languageSelectionButtons {
     function changeLanguge(clickablearea, languageChange) {
       clickablearea.addEventListener("click", () => {
         ln = languageChange;
-        setDirection(ln);
+        map.setLayoutProperty('labels-symbol',"text-field", ["get", ln]);
+        if(ln != "he" &&  ln != "ar" ){
+          try {
+            this.container.classList.remove('popup-content-rtl')
+
+          } catch (error) {
+
+          }  
+        }
       });
     }
 
