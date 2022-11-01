@@ -134,18 +134,50 @@ async function loadBG() {
   Promise.all([
     fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
-    fetch("sets4.geojson").then(value => value.json()),
+    fetch("sets5.geojson").then(value => value.json()),
+    fetch(fullResultsUrl).then(value => value.json()),
   ]).then((allResponses) => {
     results2021 = allResponses[0];
     partyColor = allResponses[1];
     setsGJ = allResponses[2]
-    addLayer();
+    results2022 = allResponses[3]
+    joinResults(setsGJ,results2022)
+    
   });
 }
 map.on("load", onMapLoad);
 
 let partyColor;
 let results2021;
+function joinResults(setsGJ,results2022){
+  setsGJ.features.forEach(feature => {
+    try {
+      setResults = results2022[feature.properties.lms_code]
+      trNames = dict[feature.properties.lms_code]
+      props = {
+          ...feature.properties,
+          ...trNames
+      };
+      props.bzb = setResults["בזב"]
+      props.voters = setResults["מצביעים"]
+      props.kosher = setResults["כשרים"]
+      props.votingPercentage = props["מצביעים"]/props["בזב"]
+      delete setResults["בזב"];
+      delete setResults["מצביעים"];
+      delete setResults["כשרים"];
+      props.electionsResults = setResults
+      props.max_party = setResults.max_party
+      props.partyColor = setResults.partyColor
+      
+      props.cityVotingHeight = props.votingPercentage * 5000
+      feature.properties = props;
+    } catch (error) {
+      //console.log(error)
+    }
+    
+  })
+  addLayer();
+}
 
 function addPartiesInfo(geojson, partyColor) {
   geojson.features.forEach((feature) => {
@@ -164,14 +196,33 @@ function addPartiesInfo(geojson, partyColor) {
 }
 
 function addLayer() {
-  var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
+  //var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
   map.addSource("results", {
     type: "geojson",
-    data: geojson,
+    data: setsGJ,
   });
 
   map.addLayer({
     id: "results",
+    type: "fill",
+    source: "results",
+    layout: {},
+    paint: {
+      // Get the `fill-extrusion-color` from the source `color` property.
+      "fill-color": ["get", "partyColor"]
+    },
+    filter:[
+      "in",
+      ["get", "found"],
+      [
+        "literal",
+        [1],
+      ],
+    ]
+  });
+
+  map.addLayer({
+    id: "results-extruded",
     type: "fill-extrusion",
     source: "results",
     layout: {},
@@ -188,6 +239,14 @@ function addLayer() {
       // Make extrusions slightly opaque to see through indoor walls.
       "fill-extrusion-opacity": 0.5,
     },
+    filter:[
+      "in",
+      ["get", "found"],
+      [
+        "literal",
+        [1],
+      ],
+    ]
   });
   map.addLayer({
     id: "labels-symbol",
@@ -195,9 +254,10 @@ function addLayer() {
     source: "results",
     layout: {
       "text-font": ["Noto Sans Regular"],
-      "text-field": ["get", "areaId"],
+      "text-field": ["get", ln],
       "text-size": 16,
       "text-anchor": "bottom",
+      "icon-allow-overlap": false,
       "text-offset": [0, -2],
     },
     paint: {
@@ -207,10 +267,10 @@ function addLayer() {
     },
     filter: [
       "in",
-      ["get", "areaId"],
+      ["get", "lms_code"],
       [
         "literal",
-        ["תל אביב יפו", "ירושלים", "חיפה", "אילת", "טבריה", "באר שבע"],
+        [5000, 3000, 4000, 2600, 6700, 9000],
       ],
     ],
   });
@@ -222,10 +282,8 @@ function addLayer() {
 function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
-    console.log(feature);
     var center = turf.centroid(feature.geometry);
-    console.log(feature.properties.partyName);
-    var description = `<h2>${tr(feature.properties.id, ln)}</h2>`;
+    var description = `<h2>${tr(feature.properties.lms_code, ln)}</h2>`;
     //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
 
 
