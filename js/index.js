@@ -115,7 +115,7 @@ async function loadBG() {
     fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
     fetch("sets5.geojson").then(value => value.json()),
-    fetch("national.json").then(value => value.json()),
+    fetch(nationalResultsUrl).then(value => value.json()),
     fetch(fullResultsUrl).then(value => value.json()),
   ]).then((allResponses) => {
     results2021 = allResponses[0];
@@ -156,28 +156,28 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      //console.log(error)
+      console.log(error)
     }
     
   })
   addLayer();
 }
 
-function addPartiesInfo(geojson, partyColor) {
-  geojson.features.forEach((feature) => {
-    var partyColorForFeature = partyColor[feature.properties.max_party];
+// function addPartiesInfo(geojson, partyColor) {
+//   geojson.features.forEach((feature) => {
+//     var partyColorForFeature = partyColor[feature.properties.max_party];
 
-    if (partyColorForFeature) {
-      feature.properties.partyColor = partyColorForFeature.Color;
-      feature.properties.partyName = tr(feature.properties.max_party, ln);
-      feature.properties.cityVotingHeight =
-      feature.properties.votingPercentage * 500;
-        //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
-    }
-  });
+//     if (partyColorForFeature) {
+//       feature.properties.partyColor = partyColorForFeature.Color;
+//       feature.properties.partyName = tr(feature.properties.max_party, ln);
+//       //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
+//       feature.properties.cityVotingHeight =
+//       feature.properties.votingPercentage * 500;
+//     }
+//   });
 
-  return geojson;
-}
+//   return geojson;
+// }
 
 function addLayer() {
   //var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
@@ -364,10 +364,10 @@ function addNationalResultsPlot(){
     try {
       let element = myArray[index];
           //Tr will work when the real results arrive
-          //x.push(tr(element.partyName),ln)
-      console.log("creating plot - party name " +element.partyName)
+          x.push(tr(element.partyName,ln))
+      //console.log("creating plot - party name " +element.partyName)
       
-      x.push(tr(element.partyName,ln))
+      //x.push(tr(element.partyName,ln))
       y.push(element.totalMandates)  
     } catch (error) {
       console.log(myArray)
@@ -492,10 +492,9 @@ class displayNationtalScoreBtn {
               addPlot()
 }
           else{
-              
               nationtalScore.onRemove()
               nationtalScore = undefined;
-              console.log(clickCount)
+              // console.log(clickCount)
           } 
           
           clickCount++
