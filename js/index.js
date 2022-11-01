@@ -1,4 +1,6 @@
 const queryString = window.location.search;
+const fullResultsUrl = "https://script.google.com/macros/s/AKfycbyKWmvN7Abj12obdm3F0q15Xxi5KILdnqW0Lu5xHc-NSJTAQB2W1mk9ZLjzV2hT6Mbi/exec?national=0"
+const nationalResultsUrl = "https://script.google.com/macros/s/AKfycbyKWmvN7Abj12obdm3F0q15Xxi5KILdnqW0Lu5xHc-NSJTAQB2W1mk9ZLjzV2hT6Mbi/exec?national=1"
 const urlParams = new URLSearchParams(queryString);
 let ln = urlParams.get("ln") ? urlParams.get("ln") : "he";
 const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
@@ -132,9 +134,11 @@ async function loadBG() {
   Promise.all([
     fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
+    fetch("sets4.geojson").then(value => value.json()),
   ]).then((allResponses) => {
     results2021 = allResponses[0];
     partyColor = allResponses[1];
+    setsGJ = allResponses[2]
     addLayer();
   });
 }
