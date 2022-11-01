@@ -149,6 +149,7 @@ function joinResults(setsGJ,results2022){
       delete setResults["בזב"];
       delete setResults["מצביעים"];
       delete setResults["כשרים"];
+      delete setResults["פסולים"];
       props.electionsResults = setResults
       props.max_party = setResults.max_party
       props.partyColor = setResults.partyColor
@@ -282,14 +283,26 @@ function addInteractions() {
     )}<br>`;
     description += '<div id="plot">';
 
-    props = JSON.parse(feature.properties.electionsResults);
-    console.log(props);
-    keys = Object.keys(props);
-    values = Object.values(props);
+    let props = JSON.parse(feature.properties.electionsResults);
+    delete props["max_party"]
+    delete props["partyColor"]
+    let sortable = [];
+    for (var key in props) {
+        sortable.push([key, props[key]]);
+    }
+    sortable.sort(function(a, b) {
+        return a[1] - b[1];
+    });
+    let keys = []
+    let values = []
+    for(var k=0;k<sortable.length;k++){
+      keys.push(sortable[k][0])
+      values.push(sortable[k][1])
+    }
     var data = [];
     for (var i = 0; i < keys.length; i++) {
       trace = {
-        y: ["תוצאות"],
+        y: ["קולות"],
         x: [values[i]],
         name: keys[i],
         orientation: "h",
@@ -301,11 +314,12 @@ function addInteractions() {
 
     var layout = {
       barmode: "stack",
-      height: 200,
+      height: 250,
       showlegend: false,
       yaxis: {
         showline: false,
         showgrid: false,
+        text:''
       },
       xaxis: {
         showline: false,
@@ -326,7 +340,7 @@ function addInteractions() {
       .addTo(map);
 
     setDirection(ln);
-    console.log(data);
+    
     Plotly.newPlot("plot", data, layout, {
       scrollZoom: false,
       displayModeBar: false,
