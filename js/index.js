@@ -385,7 +385,10 @@ function addPlot(){
     width: vw*0.9,
     height: 0.3*vh
   }
-  Plotly.newPlot("hiddenContent", nationalResults,layout);
+  let config = {
+    displayModeBar: false, // this is the line that hides the bar.
+  };
+  Plotly.newPlot("hiddenContent", nationalResults,layout,config);
 
 }
 class displayNationtalScore {
