@@ -98,28 +98,7 @@ async function onMapLoad(){
     
     loadBG()
 }
-async function loadBG(){
-    const BGresponse = await fetch('israel.fgb');
-    for await (let feature of flatgeobuf.deserialize(BGresponse.body, undefined)) {
 
-        israelGJ.features.push(feature)
-        let sourceObject = map.getSource('israelBG');
-        sourceObject.setData(israelGJ)
-    }
-
-
-    Promise.all([
-        fetch("elections.json").then(value => value.json()),
-        fetch("parties.json").then(value => value.json()),
-        fetch("sets4.geojson").then(value => value.json()),
-
-        ]).then(allResponses => {
-            results2021 = allResponses[0]
-            partyColor = allResponses[1]
-            setsGJ = allResponses[2]
-            addLayer()
-          })
-}
 async function loadBG() {
   const BGresponse = await fetch("israel.fgb");
   for await (let feature of flatgeobuf.deserialize(
@@ -172,11 +151,12 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      //console.log(error)
+      console.log(feature)
     }
     
   })
   addLayer();
+  addNationalResultsPlot()
 }
 
 function addPartiesInfo(geojson, partyColor) {
@@ -257,6 +237,7 @@ function addLayer() {
       "text-field": ["get", ln],
       "text-size": 16,
       "text-anchor": "bottom",
+      "symbol-spacing": 5000,
       "icon-allow-overlap": false,
       "text-offset": [0, -2],
     },
@@ -365,15 +346,134 @@ function addInteractions() {
     map.getCanvas().style.cursor = "";
   });
 }
-
-function setDirection(ln) {
-  if (ln != "he") {
-    const popupContentStyle = document.querySelector(
-      ".maplibregl-popup-content"
-    );
-    popupContentStyle.direction = "left";
+function setDirection(ln){
+  if(ln != "he" || "ar" ){
+      const popupContentStyle = document.querySelector('.maplibregl-popup-content');
+      popupContentStyle.direction = "left"
   }
 }
+function addNationalResultsPlot(){
+  let plotData = {},
+  x =[],
+  y =[]
+  for (let index = 0; index < results.parties.length; index++) {
+      let element = results.parties[index];
+      if (element.aboveBlockPercent) {
+          //Tr will work when the real results arrive
+          //x.push(tr(element.partyName),ln)
+          x.push(element.partyName)
+          y.push(element.totalMandates)         
+      }
+      //plotData({x:[].push(element.partyName),y:[].push(element.votes)})
+      
+  }
+  plotData=[{x,y,type:"bar"}]
+  Plotly.newPlot('hiddenContent', plotData);
+  
+}
+
+class displayNationtalScore {
+  onAdd(map){
+      this.map = map;
+      
+      this.container = document.createElement('div');
+      this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+
+      this.nationtalScore = document.createElement('button');
+      this.nationtalScore.className = "nationalResultsBtn"
+      this.nationtalScore.textContent = tr("nationalResults",ln)
+
+      this.container.appendChild(this.nationtalScore)
+
+      this.slider = document.createElement("div")
+      this.slider.id = "slider"
+      this.slider.className = "slide-up"
+
+      this.container.appendChild(this.slider)
+
+      this.filler = document.createElement("div")
+
+      this.slider.appendChild(this.filler)
+
+      this.contants = document.createElement("div")
+      this.contants.className = "contents"
+      this.contants.id = "hiddenContent"
+
+      this.slider.appendChild(this.contants)
+
+      const slider = this.slider
+      const contants = this.contants
+      
+      //var result = Object.keys(results).map((key) => [key, results[key]]);
+
+      
+      this.nationtalScore.addEventListener("click", function() {
+
+          if (window.getComputedStyle(slider).getPropertyValue("display") == "none") {
+              slider.classList.toggle("slide-down")
+
+              contants.style.display = "block";
+            }
+            else if (window.getComputedStyle(contants).getPropertyValue("display") == "block") {
+              contants.style.display = "none";
+            }
+      
+          
+      });
+
+      
+      return this.container;
+  }
+  // onAdd(map){
+  //     this.map = map;
+      
+  //     this.container = document.createElement('div');
+  //     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+
+  //     this.nationtalScore = document.createElement('button');
+  //     this.nationtalScore.className = "nationalResultsBtn"
+  //     this.nationtalScore.textContent = tr("nationalResults",ln)
+
+  //     this.container.appendChild(this.nationtalScore)
+
+  //     this.slider = document.createElement("div")
+  //     this.slider.id = "slider"
+  //     this.slider.className = "slide-up"
+
+  //     this.container.appendChild(this.slider)
+
+  //     this.filler = document.createElement("div")
+
+  //     this.slider.appendChild(this.filler)
+
+  //     this.contants = document.createElement("p")
+  //     this.contants.className = "contents"
+  //     this.contants.textContent = "teset"
+
+  //     this.slider.appendChild(this.contants)
+
+  //     const slider = this.slider
+  //     this.nationtalScore.addEventListener("click", function() {
+  //             //let silder = document.getElementById("slider");
+      
+  //             slider.classList.toggle("slide-down")
+          
+  //     //     //let results = calcMandates()
+  //     });
+
+      
+  //     return this.container;
+  // }
+  onRemove(){
+    this.container.parentNode.removeChild(this.container);
+    this.map = undefined;
+  }
+  
+}
+
+let myDisplayNationtalScore = new displayNationtalScore();
+
+map.addControl(myDisplayNationtalScore);
 
 class languageSelectionButtons {
   onAdd(map) {
@@ -401,13 +501,14 @@ class languageSelectionButtons {
     }
 
     return this.container;
+
   }
-  onRemove() {
+  onRemove(){
     this.container.parentNode.removeChild(this.container);
     this.map = undefined;
   }
 }
 
-let myCustomControl = new languageSelectionButtons();
+let myLanguageSelectionButtons = new languageSelectionButtons();
 
-map.addControl(myCustomControl, (position = "top-left"));
+map.addControl(myLanguageSelectionButtons,position = 'top-left');
