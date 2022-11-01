@@ -262,8 +262,9 @@ function addLayer() {
 function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
+    var center = turf.centroid(feature.geometry);
     try {
-      var center = turf.centroid(feature.geometry);
+      
     if(ln != "he" && ln != "ar" ){
       //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
         var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
@@ -351,6 +352,20 @@ function addInteractions() {
     } catch (error) {
       console.log("can't create popup for feature")
       console.log(feature)
+      if(ln != "he" && ln != "ar" ){
+        //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+          var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }else{
+          var description = `<div class="popup-content-rtl"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }
+        description += `${tr("no_results_yet",ln)}`
+
+        popup
+          .setLngLat(center.geometry.coordinates)
+          .setHTML(description)
+          .addTo(map);
+
+
     }
     
   });
