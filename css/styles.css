@@ -155,5 +155,35 @@
 @media (min-width: 768px) {
     #hiddenContent{
         width: 300px;
+        margin: 0;
+        padding: 0;
     }
+    .nationalResultsMapboxgl{
+        margin: 0 0 0 0;
+    }
+    .plot-container{
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        margin: 0px;
+        padding: 0;
+    }
+    .slide-down > div {
+        margin-top: auto;
+    }
+    .slide-up > div, .slide-down > div {
+        margin-top: -25%;
+        transition: margin-top 0.4s ease-in-out;
+      }
+      .contents {
+        background: transparent;
+        color: rgba(0, 0, 0, .8);
+        margin: 0;
+          margin-top: 0px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        bottom: 0;
+        position: absolute;
+      }
 }

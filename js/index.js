@@ -5,6 +5,8 @@ const urlParams = new URLSearchParams(queryString);
 let ln = urlParams.get("ln") ? urlParams.get("ln") : "he";
 const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+const vw = window.innerWidth;
+const vh = window.inneHeight;
 let results = 0
 
 var map = new maplibregl.Map({
@@ -465,14 +467,14 @@ class displayNationtalScoreBtn {
       this.nationtalScore.addEventListener("click", function() {
 
           if ( clickCount % 2 == 0 ) {
-              console.log("add")
+              
               console.log(clickCount)
               nationtalScore = new displayNationtalScore();
               map.addControl(nationtalScore,'bottom-right');
               addPlot()
 }
           else{
-              console.log("remove")
+              
               nationtalScore.onRemove()
               nationtalScore = undefined;
               console.log(clickCount)
@@ -496,6 +498,11 @@ let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
   map.addControl(mydisplayNationtalScoreBtn);
 
 function addPlot(){
-    Plotly.newPlot("hiddenContent", nationalResults);
+    let layout = {
+      autosize: true,
+      width: vw*0.9,
+      height: 0.3*vh
+    }
+    Plotly.newPlot("hiddenContent", nationalResults,layout);
 
 }
