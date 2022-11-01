@@ -379,7 +379,15 @@ function addNationalResultsPlot(){
   return plotData
   
 }
+function addPlot(){
+  let layout = {
+    autosize: true,
+    width: vw*0.9,
+    height: 0.3*vh
+  }
+  Plotly.newPlot("hiddenContent", nationalResults,layout);
 
+}
 class displayNationtalScore {
   onAdd(map){
       this.map = map;
@@ -514,12 +522,25 @@ let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
 
   map.addControl(mydisplayNationtalScoreBtn);
 
-function addPlot(){
-    let layout = {
-      autosize: true,
-      width: vw*0.9,
-      height: 0.3*vh
-    }
-    Plotly.newPlot("hiddenContent", nationalResults,layout);
-
-}
+//   class displayUpdateDate {
+//     onAdd(map){
+//         this.map = map;
+        
+//         this.container = document.createElement('div');
+//         this.container.className = 'updateDateBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
+//         this.container.textContent = "test"
+        
+//         return this.container;
+//     }
+//     onRemove(){
+//       this.container.parentNode.removeChild(this.container);
+//       this.map = undefined;
+//     }
+    
+//   }
+  
+//   let myUpdateDate = new displayUpdateDate();
+  
+//     map.addControl(myUpdateDate,'bottom-left');
+  
+  
