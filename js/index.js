@@ -7,7 +7,9 @@ const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 const vw = window.innerWidth;
 const vh = window.inneHeight;
+let nationalResults;
 let results = 0
+let popup = new maplibregl.Popup({ maxWidth: "300px" });
 
 var map = new maplibregl.Map({
   container: "map",
@@ -112,27 +114,31 @@ async function loadBG() {
   }
 
   Promise.all([
-    fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
     fetch("sets5.geojson").then(value => value.json()),
     fetch(nationalResultsUrl).then(value => value.json()),
     fetch(fullResultsUrl).then(value => value.json()),
   ]).then((allResponses) => {
-    results2021 = allResponses[0];
-    partyColor = allResponses[1];
-    setsGJ = allResponses[2]
-    results = runCalc(allResponses[3])
-    results2022 = allResponses[4]
-    nationalResults = addNationalResultsPlot()
-    mydisplayNationtalScoreBtn.onAdd()
-    joinResults(setsGJ,results2022)
+    try {
+      partyColor = allResponses[0];
+      setsGJ = allResponses[1]
+      nationalResults = allResponses[2]
+      results2022 = allResponses[3]
+      //results = runCalc(nationalResults)
+      //nationalResults = addNationalResultsPlot()
+      mydisplayNationtalScoreBtn.onAdd()
+      joinResults(setsGJ,results2022)  
+    } catch (error) {
+      console.log(error)
+    }
+    
     
   });
 }
 map.on("load", onMapLoad);
 
 let partyColor;
-let results2021;
+
 function joinResults(setsGJ,results2022){
   setsGJ.features.forEach(feature => {
     try {
@@ -157,31 +163,16 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      console.log(error)
+      console.log(feature)
     }
     
   })
   addLayer();
 }
 
-// function addPartiesInfo(geojson, partyColor) {
-//   geojson.features.forEach((feature) => {
-//     var partyColorForFeature = partyColor[feature.properties.max_party];
-
-//     if (partyColorForFeature) {
-//       feature.properties.partyColor = partyColorForFeature.Color;
-//       feature.properties.partyName = tr(feature.properties.max_party, ln);
-//       //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
-//       feature.properties.cityVotingHeight =
-//       feature.properties.votingPercentage * 500;
-//     }
-//   });
-
-//   return geojson;
-// }
 
 function addLayer() {
-  //var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
+  
   map.addSource("results", {
     type: "geojson",
     data: setsGJ,
@@ -267,7 +258,8 @@ function addLayer() {
 function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
-    var center = turf.centroid(feature.geometry);
+    try {
+      var center = turf.centroid(feature.geometry);
     if(ln != "he" && ln != "ar" ){
       //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
         var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
@@ -288,7 +280,7 @@ function addInteractions() {
     delete props["partyColor"]
     let sortable = [];
     for (var key in props) {
-        sortable.push([key, props[key]]);
+        sortable.push([key.replace('\r',''), props[key]]);
     }
     sortable.sort(function(a, b) {
         return a[1] - b[1];
@@ -340,7 +332,7 @@ function addInteractions() {
       },
     };
 
-    new maplibregl.Popup({ maxWidth: "300px" })
+    popup
       .setLngLat(center.geometry.coordinates)
       .setHTML(description)
       .addTo(map);
@@ -351,6 +343,12 @@ function addInteractions() {
       scrollZoom: false,
       displayModeBar: false,
     });
+      
+    } catch (error) {
+      console.log("can't create popup for feature")
+      console.log(feature)
+    }
+    
   });
 
   // Change the cursor to a pointer when the mouse is over the places layer.

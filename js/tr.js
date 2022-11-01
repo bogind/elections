@@ -4439,12 +4439,9 @@ const dict = {
   }
 };
 function tr(s, l) {
-
-  return dict[s][l]
-  // try {
-  //   ;
-  // } catch {
-  //   console.log("its a win");
-  //   ;
-  // }
+  try {
+    return dict[s][l] 
+  } catch (error) {
+    console.log(`can't find: "${s}"`)
+  }
 }
