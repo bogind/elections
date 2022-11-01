@@ -11,6 +11,18 @@ const dict = {
     ru:"Результаты",
     ar:"النتائج الوطنية"
   },
+  "partial_results":{
+    he:"תוצאות חלקיות",
+    en:"Partial Results",
+    ru:"Частичные результаты",
+    ar:"النتائج الجزئية"
+  },
+  "last_update":{
+    he:"עדכון אחרון",
+    en:"Last update",
+    ru:"Последнее обновление",
+    ar:"اخر تحديث"
+  },
   "אמת": {
     he: "מפלגת העבודה",
     en: "The Israeli Labor Party",

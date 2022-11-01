@@ -7,6 +7,7 @@ const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 const vw = window.innerWidth;
 const vh = window.inneHeight;
+let updatesControl;
 let nationalResults;
 let results = 0
 let popup = new maplibregl.Popup({ maxWidth: "300px" });
@@ -128,6 +129,9 @@ async function loadBG() {
       //nationalResults = addNationalResultsPlot()
       mydisplayNationtalScoreBtn.onAdd()
       joinResults(setsGJ,results2022)  
+      let updatesControl = new UpdatesControl();
+      map.addControl(updatesControl,'bottom-left');
+
     } catch (error) {
       console.log(error)
     }
@@ -543,4 +547,21 @@ function addPlot(){
     };
     Plotly.newPlot("hiddenContent", nationalResults,layout,config);
 
+}
+
+
+class UpdatesControl {
+  onAdd(map){
+    this.map = map;
+    this.container = document.createElement('div');
+    this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+    let content = `${tr("partial_results",ln)}<br>`;
+    content += `${tr("last_update",ln)}: ${nationalResults.lastUpdate}`
+    this.container.innerHTML = content;
+    return this.container;
+  }
+  onRemove(){
+    this.container.parentNode.removeChild(this.container);
+    this.map = undefined;
+  }
 }
