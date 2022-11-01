@@ -121,7 +121,10 @@ async function loadBG(){
             setsGJ = allResponses[3]
 
             addLayer()
-            addNationalResultsPlot()
+            nationalResults = addNationalResultsPlot()
+            mydisplayNationtalScoreBtn.onAdd()
+            
+
 
           })
 }
@@ -292,34 +295,28 @@ function addNationalResultsPlot(){
     let plotData = {},
     x =[],
     y =[]
-    for (let index = 0; index < results.parties.length; index++) {
-        let element = results.parties[index];
-        if (element.aboveBlockPercent) {
+    myArray = results.parties.filter(function( obj ) {
+        return obj.aboveBlockPercent !== false;
+    });
+    myArray.sort((a, b) => (a.totalMandates > b.totalMandates ? -1 : 1))
+    for (let index = 0; index < myArray.length; index++) {
+        let element = myArray[index];
             //Tr will work when the real results arrive
             //x.push(tr(element.partyName),ln)
-            x.push(element.partyName)
-            y.push(element.totalMandates)         
-        }
-        //plotData({x:[].push(element.partyName),y:[].push(element.votes)})
+        console.log("creating plot - party name " +element.partyName)
         
+        x.push(tr(element.partyName,ln))
+        y.push(element.totalMandates)         
     }
     plotData=[{x,y,type:"bar"}]
-    Plotly.newPlot('hiddenContent', plotData);
+    return plotData
     
 }
-
 class displayNationtalScore {
     onAdd(map){
         this.map = map;
-        
         this.container = document.createElement('div');
-        this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
-
-        this.nationtalScore = document.createElement('button');
-        this.nationtalScore.className = "nationalResultsBtn"
-        this.nationtalScore.textContent = tr("nationalResults",ln)
-
-        this.container.appendChild(this.nationtalScore)
+        this.container.className = 'nationalResultsMapboxgl maplibregl-ctrl mapboxgl-ctrl';
 
         this.slider = document.createElement("div")
         this.slider.id = "slider"
@@ -337,87 +334,30 @@ class displayNationtalScore {
 
         this.slider.appendChild(this.contants)
 
-        const slider = this.slider
-        const contants = this.contants
+        this.slider.classList.toggle("slide-down")
+
+        this.contants.style.display = "block";
         
-        //var result = Object.keys(results).map((key) => [key, results[key]]);
-
-        
-        this.nationtalScore.addEventListener("click", function() {
-
-            if (window.getComputedStyle(slider).getPropertyValue("display") == "none") {
-                slider.classList.toggle("slide-down")
-
-                contants.style.display = "block";
-              }
-              else if (window.getComputedStyle(contants).getPropertyValue("display") == "block") {
-                contants.style.display = "none";
-              }
-        
-            
-        });
-
         
         return this.container;
     }
-    // onAdd(map){
-    //     this.map = map;
-        
-    //     this.container = document.createElement('div');
-    //     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
-
-    //     this.nationtalScore = document.createElement('button');
-    //     this.nationtalScore.className = "nationalResultsBtn"
-    //     this.nationtalScore.textContent = tr("nationalResults",ln)
-
-    //     this.container.appendChild(this.nationtalScore)
-
-    //     this.slider = document.createElement("div")
-    //     this.slider.id = "slider"
-    //     this.slider.className = "slide-up"
-
-    //     this.container.appendChild(this.slider)
-
-    //     this.filler = document.createElement("div")
-
-    //     this.slider.appendChild(this.filler)
-
-    //     this.contants = document.createElement("p")
-    //     this.contants.className = "contents"
-    //     this.contants.textContent = "teset"
-
-    //     this.slider.appendChild(this.contants)
-
-    //     const slider = this.slider
-    //     this.nationtalScore.addEventListener("click", function() {
-    //             //let silder = document.getElementById("slider");
-        
-    //             slider.classList.toggle("slide-down")
-            
-    //     //     //let results = calcMandates()
-    //     });
-
-        
-    //     return this.container;
-    // }
     onRemove(){
-      this.container.parentNode.removeChild(this.container);
+        this.container.remove()
+      //this.container.parentNode.removeChild(this.container);
+      this.contants.style.display = "block";
+
       this.map = undefined;
     }
     
   }
 
-  let myDisplayNationtalScore = new displayNationtalScore();
-
-  map.addControl(myDisplayNationtalScore);
-
-  class languageSelectionButtons {
+class languageSelectionButtons {
     onAdd(map) {
       this.map = map;
       this.container = document.createElement("div");
       this.container.id = "langBar";
       this.container.className =
-        "custom-control-class maplibregl-ctrl mapboxgl-ctrl";
+        "langBarMapboxgl maplibregl-ctrl mapboxgl-ctrl";
       this.container.appendChild(createLangBtn(" Hebrew |", "he"));
       this.container.appendChild(createLangBtn(" English |", "en"));
       this.container.appendChild(createLangBtn(" Arabic |", "ar"));
@@ -448,4 +388,56 @@ class displayNationtalScore {
   let myLanguageSelectionButtons = new languageSelectionButtons();
 
   map.addControl(myLanguageSelectionButtons,position = 'top-left');
+class displayNationtalScoreBtn {
+    onAdd(map){
+        this.map = map;
+        
+        this.container = document.createElement('div');
+        this.container.className = 'nationalResultsBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
+
+        this.nationtalScore = document.createElement('button');
+        this.nationtalScore.className = "nationalResultsBtn"
+        this.nationtalScore.textContent = tr("nationalResults",ln)
+
+        this.container.appendChild(this.nationtalScore)
+        var clickCount = 0;
+        var nationtalScore = 0;
+        this.nationtalScore.addEventListener("click", function() {
+
+            if ( clickCount % 2 == 0 ) {
+                console.log("add")
+                console.log(clickCount)
+                nationtalScore = new displayNationtalScore();
+                map.addControl(nationtalScore,'bottom-right');
+                addPlot()
+}
+            else{
+                console.log("remove")
+                nationtalScore.onRemove()
+                nationtalScore = undefined;
+                console.log(clickCount)
+            } 
+            
+            clickCount++
+
+              });
+        
+        return this.container;
+    }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+    
+  }
+
+  let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
+
+  map.addControl(mydisplayNationtalScoreBtn);
+
+function addPlot(){
+    Plotly.newPlot("hiddenContent", nationalResults);
+
+}
+
 

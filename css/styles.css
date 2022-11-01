@@ -121,9 +121,11 @@
       
     }
     .slide-up, .slide-down {
-      
-      overflow:hidden;
-      
+        pointer-events: none;
+        position: relative;
+        overflow:hidden;
+        line-height: 0
+      /* top:50%;left:50% */
       
     }
     .slide-up > div, .slide-down > div {
@@ -137,7 +139,7 @@
       display: inline-block;
       
     } 
-    .custom-control-class maplibregl-ctrl mapboxgl-ctrl{
+    .langBarMapboxgl maplibregl-ctrl mapboxgl-ctrl{
       position:relative;
 
       /* padding: 220px;
@@ -145,4 +147,22 @@
       width: 300px;
       height: 200px;  */
 
-          }
+   }
+   .nationalResultsBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl{
+    position:relative;
+
+    /* padding: 220px;
+
+    width: 300px;
+    height: 200px;  */
+
+ }
+ .nationalResultsMapboxgl c maplibregl-ctrl mapboxgl-ctrl{
+    position:relative;
+
+    /* padding: 220px;
+
+    width: 300px;
+    height: 200px;  */
+
+ }
