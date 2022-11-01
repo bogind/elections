@@ -109,6 +109,8 @@ async function loadBG(){
             partyColor = allResponses[1]
             results = runCalc(allResponses[2])
             addLayer()
+            addNationalResultsPlot()
+
           })
 }
 map.on('load',onMapLoad)
@@ -163,38 +165,7 @@ function addLayer(){
         'fill-extrusion-opacity': 0.5
         }
         });  
-        map.addLayer({
-            id: "trailheads-symbol",
-            type: "symbol",
-            source: "results",
-            layout: {
-  
-              "text-font": ["Arial Italic"],
-              "text-field": ["get", "areaId"],
-              "text-size": 12,
-              "text-anchor": "bottom",
-              "text-offset": [0, -2]
-  
-            },
-            paint: {
-              "text-color": "white",
-              "text-halo-color": "seagreen",
-              "text-halo-width": 2
-  
-            }
-          });
-        // map.setLayoutProperty('results', 'text-field', [
-        //     'format',
-        //     ['get', 'areaId'],
-        //     { 'font-scale': 1.2 },
-        //     {
-        //     'font-scale': 0.8,
-        //     'text-font': [
-        //     'literal',
-        //     ['David', 'Arial Unicode MS Regular']
-        //     ]
-        //     }
-        //     ]);
+       
     
     addInteractions()
 }
@@ -279,15 +250,17 @@ function setDirection(ln){
         popupContentStyle.direction = "left"
     }
 }
-function returnPlot(){
+function addNationalResultsPlot(){
     let plotData = {},
     x =[],
     y =[]
-    for (let index = 0; index < results.length; index++) {
-        let element = results[index];
+    for (let index = 0; index < results.parties.length; index++) {
+        let element = results.parties[index];
         if (element.aboveBlockPercent) {
+            //Tr will work when the real results arrive
+            //x.push(tr(element.partyName),ln)
             x.push(element.partyName)
-            y.push(element.mandatesByVotes)         
+            y.push(element.totalMandates)         
         }
 
         //plotData({x:[].push(element.partyName),y:[].push(element.votes)})
@@ -330,15 +303,12 @@ class displayNationtalScore {
         const slider = this.slider
         const contants = this.contants
         
-        //var result = Object.keys(results).map((key) => [key, results[key]]);
-
         
         this.nationtalScore.addEventListener("click", function() {
 
             if (window.getComputedStyle(slider).getPropertyValue("display") == "none") {
                 console.log("up")
                 slider.classList.toggle("slide-down")
-                returnPlot()
                 slider.style.display = "block";
               }
               else if (window.getComputedStyle(slider).getPropertyValue("display") == "block") {
@@ -355,46 +325,7 @@ class displayNationtalScore {
         
         return this.container;
     }
-    // onAdd(map){
-    //     this.map = map;
-        
-    //     this.container = document.createElement('div');
-    //     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
 
-    //     this.nationtalScore = document.createElement('button');
-    //     this.nationtalScore.className = "nationalResultsBtn"
-    //     this.nationtalScore.textContent = tr("nationalResults",ln)
-
-    //     this.container.appendChild(this.nationtalScore)
-
-    //     this.slider = document.createElement("div")
-    //     this.slider.id = "slider"
-    //     this.slider.className = "slide-up"
-
-    //     this.container.appendChild(this.slider)
-
-    //     this.filler = document.createElement("div")
-
-    //     this.slider.appendChild(this.filler)
-
-    //     this.contants = document.createElement("p")
-    //     this.contants.className = "contents"
-    //     this.contants.textContent = "teset"
-
-    //     this.slider.appendChild(this.contants)
-
-    //     const slider = this.slider
-    //     this.nationtalScore.addEventListener("click", function() {
-    //             //let silder = document.getElementById("slider");
-        
-    //             slider.classList.toggle("slide-down")
-            
-    //     //     //let results = calcMandates()
-    //     });
-
-        
-    //     return this.container;
-    // }
     onRemove(){
       this.container.parentNode.removeChild(this.container);
       this.map = undefined;
@@ -406,41 +337,33 @@ class displayNationtalScore {
 
   map.addControl(myDisplayNationtalScore);
 
-class languageSelectionButtons {
-    onAdd(map){
+
+  class languageSelectionButtons {
+    onAdd(map) {
       this.map = map;
-      this.container = document.createElement('div');
-      this.hebBtn = document.createElement('a');
-      this.hebBtn.textContent = " Hebrew |"
-      this.enBtn = document.createElement('a');
-      this.enBtn.textContent = " English |"
-      this.arBtn = document.createElement('a');
-      this.arBtn.textContent = " Arabic |"
-      this.rusBtn = document.createElement('a');
-      this.rusBtn.textContent = " Russian"
-      this.container.appendChild(this.hebBtn)
-      this.container.appendChild(this.enBtn)
-      this.container.appendChild(this.arBtn)
-      this.container.appendChild(this.rusBtn)
-      this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
-      this.hebBtn.className = 'langBtn'
-      this.enBtn.className = 'langBtn'
-      this.arBtn.className = 'langBtn'
-      this.rusBtn.className = 'langBtn'
-      changeLanguge(this.hebBtn,'he');
-      changeLanguge(this.enBtn,'en');
-      changeLanguge(this.arBtn,'ar');
-      changeLanguge(this.rusBtn,'ru');
-        function changeLanguge(clickablearea,languageChange) {
-            clickablearea.addEventListener("click", () => {
-                ln = languageChange;
-            });
-
-        }
-
-
-        return this.container;
-
+      this.container = document.createElement("div");
+      this.container.id = "langBar";
+      this.container.className =
+        "custom-control-class maplibregl-ctrl mapboxgl-ctrl";
+      this.container.appendChild(createLangBtn(" Hebrew |", "he"));
+      this.container.appendChild(createLangBtn(" English |", "en"));
+      this.container.appendChild(createLangBtn(" Arabic |", "ar"));
+      this.container.appendChild(createLangBtn(" Russian", "ru"));
+      function createLangBtn(btnLngText, lng) {
+        let btn = document.createElement("a");
+        btn.textContent = btnLngText;
+        btn.className = "langBtn";
+        changeLanguge(btn, lng);
+        return btn;
+      }
+      function changeLanguge(clickablearea, languageChange) {
+        clickablearea.addEventListener("click", () => {
+          ln = languageChange;
+          setDirection(ln);
+        });
+      }
+  
+      return this.container;
     }
     onRemove(){
       this.container.parentNode.removeChild(this.container);

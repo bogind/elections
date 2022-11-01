@@ -1,7 +1,9 @@
-nationalResults = []
 function runCalc(allResponses){
-    tempParties = []
+    let nationalResults = []
+
+    let tempParties = []
     totalVotes = allResponses["כשרים"]
+    ableVotes = allResponses["בזב"]
     responseList = Object.entries(turnObjectToArrayExFields(allResponses,['כשרים','פסולים','מצביעים','בזב',"updated"]))
     for (var i = 0; i < responseList.length; i++) {
 
@@ -22,7 +24,7 @@ function runCalc(allResponses){
         nationalResults = ({parties:tempParties,partyConnections:_partyConnections}) 
         _parties = nationalResults.parties
         console.log(_parties)
-        var results =  calcMandates()
+        var results =  calcAll()
         return results
 }
 
@@ -119,12 +121,15 @@ var partyConnection = (function () {
 })();
 
 
-
-function calcMandates (){
-
+var calcMandates = function (parties, partyConnections) {
+    var totalVotes = 0;
     var blockPercent;
     var percent = 0.0325;
-    
+
+    for (var i = 0; i < parties.length; i++) {
+        var p = parties[i];
+        totalVotes += p.votes;
+    }
 
     console.log("Total votes: " + totalVotes);
 
@@ -133,15 +138,15 @@ function calcMandates (){
 
     var totalVotesAboveBlock = 0;
 
-    for (var i = 0; i < _parties.length; i++) {
-
-        _parties[i].aboveBlockPercent = _parties[i].votes >= blockPercent;
-        if (_parties[i].aboveBlockPercent) {
-            totalVotesAboveBlock += _parties[i].votes;
-            console.log("Party " + _parties[i].partyName + " above block percent with " + _parties[i].votes + " votes");
+    for (var i = 0; i < parties.length; i++) {
+        var p = parties[i];
+        p.aboveBlockPercent = p.votes >= blockPercent;
+        if (p.aboveBlockPercent) {
+            totalVotesAboveBlock += p.votes;
+            console.log("Party " + p.partyName + " above block percent with " + p.votes + " votes");
         }
         else {
-            console.log("Party " + _parties[i].partyName + " below block percent with " + _parties[i].votes + " votes");
+            console.log("Party " + p.partyName + " below block percent with " + p.votes + " votes");
         }
     }
 
@@ -152,15 +157,91 @@ function calcMandates (){
 
     var totalMandatesByVotes = 0;
 
-    for (var i = 0; i < _parties.length; i++) {
+    for (var i = 0; i < parties.length; i++) {
+        var p = parties[i];
 
-        if (_parties[i].aboveBlockPercent) {
-            _parties[i].mandatesByVotes = Math.floor(_parties[i].votes / generalMeasure);
-            totalMandatesByVotes += _parties[i].mandatesByVotes;
+        if (p.aboveBlockPercent) {
+            p.mandatesByVotes = Math.floor(p.votes / generalMeasure);
+            totalMandatesByVotes += p.mandatesByVotes;
         }
     }
 
     console.log("Total mandates by votes: " + totalMandatesByVotes);
+
+    var partiesForSpare = [];
+
+    var applicablePartyConnections = [];
+
+    for (var i = 0; i < partyConnections.length; i++) {
+        var pi = partyConnections[i];
+
+        if (!pi.party1.aboveBlockPercent || !pi.party2.aboveBlockPercent) {
+            pi.party1.connected = false;
+            pi.party2.connected = false;
+            console.log("Connection between " + pi.party1.partyName + " and " + pi.party2.partyName + " is not valid");
+        } else {
+            pi.mandatesByVotes = pi.party1.mandatesByVotes + pi.party2.mandatesByVotes;
+            partiesForSpare.push(pi);
+            applicablePartyConnections.push(pi);
+            console.log("Connection between " + pi.party1.partyName + " and " + pi.party2.partyName + " is valid");
+        }
+    }
+
+    partyConnections = applicablePartyConnections;
+
+    for (var i = 0; i < parties.length; i++) {
+        var p = parties[i];
+
+        if (!p.connected && p.aboveBlockPercent)
+            partiesForSpare.push(p);
+    }
+
+    var spareMandates = 120 - totalMandatesByVotes;
+
+    console.log("Total spare mandates: " + spareMandates);
+
+    for (var i = 0; i < spareMandates; i++) {
+        var maxPartyMeasure = 0;
+        var partyWithMaxMeasure;
+
+        for (var j = 0; j < partiesForSpare.length; j++) {
+            var ip = partiesForSpare[j];
+
+            var measure = ip.votesMethod() / (ip.mandatesByVotes + ip.spareMandates + 1);
+
+            if (measure > maxPartyMeasure) {
+                maxPartyMeasure = measure;
+                partyWithMaxMeasure = ip;
+            }
+        }
+        partyWithMaxMeasure.spareMandates++;
+        console.log("Party " + partyWithMaxMeasure.partyName + " got a spare mandate. Measure: " + maxPartyMeasure);
+    }
+
+    for (var i = 0; i < partyConnections.length; i++) {
+        var pi = partyConnections[i];
+        if (pi.spareMandates == 0)
+            continue;
+
+        var connectionMeasure = Math.floor(pi.votesMethod() / (pi.mandatesByVotes + pi.spareMandates));
+        var party1Mandates = Math.floor(pi.party1.votes / connectionMeasure);
+        var party2Mandates = Math.floor(pi.party2.votes / connectionMeasure);
+
+        pi.party1.mandatesByConnection = party1Mandates - pi.party1.mandatesByVotes;
+        pi.party2.mandatesByConnection = party2Mandates - pi.party2.mandatesByVotes;
+
+        if (party1Mandates + party2Mandates < pi.mandatesByVotes + pi.spareMandates) {
+            var party1Measure = pi.party1.votes / (party1Mandates + 1);
+            var party2Measure = pi.party2.votes / (party2Mandates + 1);
+
+            if (party1Measure > party2Measure)
+                pi.party1.spareMandates = 1;
+            else
+                pi.party2.spareMandates = 1;
+        }
+
+        partiesForSpare.splice(partiesForSpare.indexOf(pi));
+    }
 
     var result = {};
     result.totalVotes = totalVotes;
@@ -168,5 +249,136 @@ function calcMandates (){
     result.totalVotesAboveBlock = totalVotesAboveBlock;
     result.generalMeasure = generalMeasure;
     result.totalMandatesByVotes = totalMandatesByVotes;
-    return result,_parties;
+    return result;
+};
+
+var cloneParties = function (parties, partyConnections) {
+
+    var clonedParties = [];
+
+    parties.forEach(function (party) { clonedParties.push(party.clone()); });
+
+    var clonedPartyConnections = [];
+
+    partyConnections.forEach(function (pc) {
+        clonedPartyConnections.push(
+            new partyConnection(
+                // clonedPartyConnections.filter(clonedParties, function (p) { return p.partyName == pc.party1.partyName; })[0],
+                // clonedPartyConnections.filter(clonedParties, function (p) { return p.partyName == pc.party2.partyName; })[0]));
+                clonedParties.filter( function (p) { return p.partyName == pc.party1.partyName; })[0],
+                clonedParties.filter(function (p) { return p.partyName == pc.party2.partyName; })[0]));
+
+    });
+
+    return { parties: clonedParties, partyConnections: clonedPartyConnections };
+};
+
+var calcAll = function () {
+
+    _parties.forEach(function (party) { party.reset(); });
+    _partyConnections.forEach(function (pc) { pc.reset(); });
+
+    var primaryResult = calcMandates(_parties, _partyConnections);
+    primaryResult.parties = _parties;
+
+    for (var index = 0; index < _parties.length; index++) {
+        var p = _parties[index];
+
+        if (!p.aboveBlockPercent)
+            continue;
+
+        var votesDelta = primaryResult.generalMeasure;
+        var deltaChange = votesDelta;
+        var lastDeltaLostMandate = 0;
+
+        do {
+            var tempParties = cloneParties(_parties, _partyConnections);
+            var tempp = tempParties.parties[index];
+            tempp.votes -= votesDelta;
+
+            calcMandates(tempParties.parties, tempParties.partyConnections);
+
+            if (deltaChange < 2)
+                break;
+
+            deltaChange = Math.floor(deltaChange / 2);
+
+            if (tempp.totalMandates() < p.totalMandates()) {
+                lastDeltaLostMandate = votesDelta;
+                votesDelta -= deltaChange;
+            } else if (tempp.totalMandates() == p.totalMandates()) {
+                votesDelta += deltaChange;
+            }
+        } while (true);
+
+        var tempParties = cloneParties(_parties, _partyConnections);
+        var tempp = tempParties.parties[index];
+        tempp.votes -= lastDeltaLostMandate;
+        calcMandates(tempParties.parties, tempParties.partyConnections);
+
+        p.votesToLoseMandate = lastDeltaLostMandate;
+
+        for (var jindex = 0; jindex < tempParties.parties.length; jindex++) {
+            if (jindex != index && _parties[jindex].totalMandates() < tempParties.parties[jindex].totalMandates()) {
+                p.partyEarningMandate = _parties[jindex];
+                break;
+            }
+        }
+    }
+
+    for (var index = 0; index < _parties.length; index++) {
+        var p = _parties[index];
+
+        if (!p.aboveBlockPercent)
+            continue;
+
+        var votesDelta = primaryResult.generalMeasure;
+        var deltaChange = votesDelta;
+        var lastDeltaEarnMandate = 0;
+
+        do {
+            var tempParties = cloneParties(_parties, _partyConnections);
+            var tempp = tempParties.parties[index];
+            tempp.votes += votesDelta;
+
+            calcMandates(tempParties.parties, tempParties.partyConnections);
+
+            if (deltaChange < 2)
+                break;
+
+            deltaChange = Math.floor(deltaChange / 2);
+
+            if (tempp.totalMandates() > p.totalMandates()) {
+                lastDeltaEarnMandate = votesDelta;
+                votesDelta -= deltaChange;
+            } else if (tempp.totalMandates() == p.totalMandates()) {
+                votesDelta += deltaChange;
+            }
+        } while (true);
+
+        var tempParties = cloneParties(_parties, _partyConnections);
+        var tempp = tempParties.parties[index];
+        tempp.votes += lastDeltaEarnMandate;
+        calcMandates(tempParties.parties, tempParties.partyConnections);
+
+        p.missingVotesForOneMandate = lastDeltaEarnMandate;
+
+        for (var jindex = 0; jindex < tempParties.parties.length; jindex++) {
+            if (jindex != index && _parties[jindex].totalMandates() > tempParties.parties[jindex].totalMandates()) {
+                p.partyLosingMandate = _parties[jindex];
+                break;
+            }
+        }
+    }
+
+    primaryResult.totalMandates = 0;
+    primaryResult.parties.forEach(function (party) { primaryResult.totalMandates += party.totalMandates(); });
+
+    primaryResult.parties.sort((p1, p2) => p2.votes - p1.votes);
+    primaryResult.parties.forEach(function (element) {
+        element.totalMandates = element.mandatesByVotes+element.spareMandates;
+      });
+    primaryResult.nationalVotingPercentage = parseFloat(primaryResult.totalVotes/ableVotes).toFixed(2)
+    
+    return primaryResult;
 };
