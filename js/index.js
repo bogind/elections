@@ -236,7 +236,9 @@ function addInteractions() {
     console.log(feature);
     var center = turf.centroid(feature.geometry);
     console.log(feature.properties.partyName);
-    var description = `<h2>${tr(feature.properties.areaId.trim(), ln)}</h2>`;
+    var description = `<h2>${tr(feature.properties.id, ln)}</h2>`;
+    //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+
 
     description += `${tr("mostVotesPartyString", ln)} : ${tr(
       feature.properties.max_party,
