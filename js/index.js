@@ -155,7 +155,7 @@ function addPartiesInfo(geojson, partyColor) {
       feature.properties.partyColor = partyColorForFeature.Color;
       feature.properties.partyName = tr(feature.properties.max_party, ln);
       feature.properties.cityVotingHeight =
-        feature.properties.votingPercentage * 500;
+      feature.properties.votingPercentage * 500;
         //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
     }
   });
@@ -214,18 +214,7 @@ function addLayer() {
       ],
     ],
   });
-  // map.setLayoutProperty('results', 'text-field', [
-  //     'format',
-  //     ['get', 'areaId'],
-  //     { 'font-scale': 1.2 },
-  //     {
-  //     'font-scale': 0.8,
-  //     'text-font': [
-  //     'literal',
-  //     ['David', 'Arial Unicode MS Regular']
-  //     ]
-  //     }
-  //     ]);
+
 
   addInteractions();
 }
