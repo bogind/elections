@@ -4,9 +4,8 @@ const nationalResultsUrl = "https://script.google.com/macros/s/AKfycbyKWmvN7Abj1
 const urlParams = new URLSearchParams(queryString);
 let ln = urlParams.get("ln") ? urlParams.get("ln") : "he";
 const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
-const isMobile = window.matchMedia(
-  "only screen and (max-width: 760px)"
-).matches;
+const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+let results = 0
 
 var map = new maplibregl.Map({
   container: "map",
@@ -98,28 +97,7 @@ async function onMapLoad(){
     
     loadBG()
 }
-// async function loadBG(){
-//     const BGresponse = await fetch('israel.fgb');
-//     for await (let feature of flatgeobuf.deserialize(BGresponse.body, undefined)) {
 
-//         israelGJ.features.push(feature)
-//         let sourceObject = map.getSource('israelBG');
-//         sourceObject.setData(israelGJ)
-//     }
-
-
-//     Promise.all([
-//         fetch("elections.json").then(value => value.json()),
-//         fetch("parties.json").then(value => value.json()),
-//         fetch("sets4.geojson").then(value => value.json()),
-
-//         ]).then(allResponses => {
-//             results2021 = allResponses[0]
-//             partyColor = allResponses[1]
-//             setsGJ = allResponses[2]
-//             addLayer()
-//           })
-// }
 async function loadBG() {
   const BGresponse = await fetch("israel.fgb");
   for await (let feature of flatgeobuf.deserialize(
@@ -135,12 +113,16 @@ async function loadBG() {
     fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
     fetch("sets5.geojson").then(value => value.json()),
+    fetch("national.json").then(value => value.json()),
     fetch(fullResultsUrl).then(value => value.json()),
   ]).then((allResponses) => {
     results2021 = allResponses[0];
     partyColor = allResponses[1];
     setsGJ = allResponses[2]
-    results2022 = allResponses[3]
+    results = runCalc(allResponses[3])
+    results2022 = allResponses[4]
+    nationalResults = addNationalResultsPlot()
+    mydisplayNationtalScoreBtn.onAdd()
     joinResults(setsGJ,results2022)
     
   });
@@ -362,6 +344,72 @@ function setDirection(ln) {
     popupContentStyle.direction = "left";
   }
 }
+function addNationalResultsPlot(){
+  let plotData = {},
+  x =[],
+  y =[]
+  myArray = results.parties.filter(function( obj ) {
+      return obj.aboveBlockPercent !== false;
+  });
+  myArray.sort((a, b) => (a.totalMandates > b.totalMandates ? -1 : 1))
+  for (let index = 0; index < myArray.length; index++) {
+    try {
+      let element = myArray[index];
+          //Tr will work when the real results arrive
+          //x.push(tr(element.partyName),ln)
+      console.log("creating plot - party name " +element.partyName)
+      
+      x.push(tr(element.partyName,ln))
+      y.push(element.totalMandates)  
+    } catch (error) {
+      console.log(myArray)
+      console.log(index)
+    }
+             
+  }
+  plotData=[{x,y,type:"bar"}]
+  return plotData
+  
+}
+
+class displayNationtalScore {
+  onAdd(map){
+      this.map = map;
+      this.container = document.createElement('div');
+      this.container.className = 'nationalResultsMapboxgl maplibregl-ctrl mapboxgl-ctrl';
+
+      this.slider = document.createElement("div")
+      this.slider.id = "slider"
+      this.slider.className = "slide-up"
+
+      this.container.appendChild(this.slider)
+
+      this.filler = document.createElement("div")
+
+      this.slider.appendChild(this.filler)
+
+      this.contants = document.createElement("div")
+      this.contants.className = "contents"
+      this.contants.id = "hiddenContent"
+
+      this.slider.appendChild(this.contants)
+
+      this.slider.classList.toggle("slide-down")
+
+      this.contants.style.display = "block";
+      
+      
+      return this.container;
+  }
+  onRemove(){
+      this.container.remove()
+    //this.container.parentNode.removeChild(this.container);
+    this.contants.style.display = "block";
+
+    this.map = undefined;
+  }
+  
+}
 
 class languageSelectionButtons {
   onAdd(map) {
@@ -399,3 +447,55 @@ class languageSelectionButtons {
 let myCustomControl = new languageSelectionButtons();
 
 map.addControl(myCustomControl, (position = "top-left"));
+
+class displayNationtalScoreBtn {
+  onAdd(map){
+      this.map = map;
+      
+      this.container = document.createElement('div');
+      this.container.className = 'nationalResultsBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
+
+      this.nationtalScore = document.createElement('button');
+      this.nationtalScore.className = "nationalResultsBtn"
+      this.nationtalScore.textContent = tr("nationalResults",ln)
+
+      this.container.appendChild(this.nationtalScore)
+      var clickCount = 0;
+      var nationtalScore = 0;
+      this.nationtalScore.addEventListener("click", function() {
+
+          if ( clickCount % 2 == 0 ) {
+              console.log("add")
+              console.log(clickCount)
+              nationtalScore = new displayNationtalScore();
+              map.addControl(nationtalScore,'bottom-right');
+              addPlot()
+}
+          else{
+              console.log("remove")
+              nationtalScore.onRemove()
+              nationtalScore = undefined;
+              console.log(clickCount)
+          } 
+          
+          clickCount++
+
+            });
+      
+      return this.container;
+  }
+  onRemove(){
+    this.container.parentNode.removeChild(this.container);
+    this.map = undefined;
+  }
+  
+}
+
+let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
+
+  map.addControl(mydisplayNationtalScoreBtn);
+
+function addPlot(){
+    Plotly.newPlot("hiddenContent", nationalResults);
+
+}

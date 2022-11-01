@@ -151,3 +151,9 @@
     .popup-content-ltr{
         direction:ltr;
     }
+
+@media (min-width: 768px) {
+    #hiddenContent{
+        width: 300px;
+    }
+}
