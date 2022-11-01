@@ -161,13 +161,7 @@
     .nationalResultsMapboxgl{
         margin: 0 0 0 0;
     }
-    .plot-container{
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        margin: 0px;
-        padding: 0;
-    }
+
     .slide-down > div {
         margin-top: auto;
     }
