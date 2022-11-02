@@ -11,6 +11,24 @@ const dict = {
     ru:"Результаты",
     ar:"النتائج الوطنية"
   },
+  "partial_results":{
+    he:"תוצאות חלקיות",
+    en:"Partial Results",
+    ru:"Частичные результаты",
+    ar:"النتائج الجزئية"
+  },
+  "last_update":{
+    he:"עדכון אחרון",
+    en:"Last update",
+    ru:"Последнее обновление",
+    ar:"اخر تحديث"
+  },
+  "no_results_yet":{
+    he:"אין תוצאות עדיין",
+    en:"No results yet",
+    ru:"Пока нет результатов",
+    ar:"لا توجد نتائج بعد"
+  },
   "אמת": {
     he: "מפלגת העבודה",
     en: "The Israeli Labor Party",
@@ -4439,12 +4457,9 @@ const dict = {
   }
 };
 function tr(s, l) {
-
-  return dict[s][l]
-  // try {
-  //   ;
-  // } catch {
-  //   console.log("its a win");
-  //   ;
-  // }
+  try {
+    return dict[s][l] 
+  } catch (error) {
+    console.log(`can't find: "${s}"`)
+  }
 }

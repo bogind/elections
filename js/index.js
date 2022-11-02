@@ -7,7 +7,10 @@ const showBorders = urlParams.get("border") ? urlParams.get("border") : 0;
 const isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 const vw = window.innerWidth;
 const vh = window.inneHeight;
+let updatesControl;
+let nationalResults;
 let results = 0
+let popup = new maplibregl.Popup({ maxWidth: "300px" });
 
 var map = new maplibregl.Map({
   container: "map",
@@ -112,27 +115,34 @@ async function loadBG() {
   }
 
   Promise.all([
-    fetch("elections.json").then((value) => value.json()),
     fetch("parties.json").then((value) => value.json()),
     fetch("sets5.geojson").then(value => value.json()),
     fetch(nationalResultsUrl).then(value => value.json()),
     fetch(fullResultsUrl).then(value => value.json()),
   ]).then((allResponses) => {
-    results2021 = allResponses[0];
-    partyColor = allResponses[1];
-    setsGJ = allResponses[2]
-    results = runCalc(allResponses[3])
-    results2022 = allResponses[4]
-    nationalResults = addNationalResultsPlot()
-    mydisplayNationtalScoreBtn.onAdd()
-    joinResults(setsGJ,results2022)
+    try {
+      partyColor = allResponses[0];
+      setsGJ = allResponses[1]
+      nationalResults = allResponses[2]
+      results2022 = allResponses[3]
+      //results = runCalc(nationalResults)
+      //nationalResults = addNationalResultsPlot()
+      mydisplayNationtalScoreBtn.onAdd()
+      joinResults(setsGJ,results2022)  
+      let updatesControl = new UpdatesControl();
+      map.addControl(updatesControl,'bottom-left');
+
+    } catch (error) {
+      console.log(error)
+    }
+    
     
   });
 }
 map.on("load", onMapLoad);
 
 let partyColor;
-let results2021;
+
 function joinResults(setsGJ,results2022){
   setsGJ.features.forEach(feature => {
     try {
@@ -149,6 +159,7 @@ function joinResults(setsGJ,results2022){
       delete setResults["בזב"];
       delete setResults["מצביעים"];
       delete setResults["כשרים"];
+      delete setResults["פסולים"];
       props.electionsResults = setResults
       props.max_party = setResults.max_party
       props.partyColor = setResults.partyColor
@@ -156,31 +167,21 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      console.log(error)
+      trNames = dict[feature.properties.lms_code]
+      props = {
+          ...feature.properties,
+          ...trNames
+      };
+      feature.properties = props;
     }
     
   })
   addLayer();
 }
 
-// function addPartiesInfo(geojson, partyColor) {
-//   geojson.features.forEach((feature) => {
-//     var partyColorForFeature = partyColor[feature.properties.max_party];
-
-//     if (partyColorForFeature) {
-//       feature.properties.partyColor = partyColorForFeature.Color;
-//       feature.properties.partyName = tr(feature.properties.max_party, ln);
-//       //feature.properties.votingPercentage = feature.properties.electionsResults.כשרים/feature.properties.electionsResults.בזב
-//       feature.properties.cityVotingHeight =
-//       feature.properties.votingPercentage * 500;
-//     }
-//   });
-
-//   return geojson;
-// }
 
 function addLayer() {
-  //var geojson = addPartiesInfo(results2021.citiesData.results, partyColor);
+  
   map.addSource("results", {
     type: "geojson",
     data: setsGJ,
@@ -258,6 +259,25 @@ function addLayer() {
       ],
     ],
   });
+  map.addLayer({
+    id: "labels-symbol-zoomed-in",
+    type: "symbol",
+    source: "results",
+    minzoom: 11,
+    layout: {
+      "text-font": ["Noto Sans Regular"],
+      "text-field": ["get", ln],
+      "text-size": 16,
+      "text-anchor": "bottom",
+      "icon-allow-overlap": false,
+      "text-offset": [0, -2],
+    },
+    paint: {
+      "text-color": "black",
+      "text-halo-color": "white",
+      "text-halo-width": 1,
+    }
+  });
 
 
   addInteractions();
@@ -267,6 +287,8 @@ function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
     var center = turf.centroid(feature.geometry);
+    try {
+      
     if(ln != "he" && ln != "ar" ){
       //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
         var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
@@ -282,30 +304,49 @@ function addInteractions() {
     )}<br>`;
     description += '<div id="plot">';
 
-    props = JSON.parse(feature.properties.electionsResults);
-    console.log(props);
-    keys = Object.keys(props);
-    values = Object.values(props);
+    let props = JSON.parse(feature.properties.electionsResults);
+    delete props["max_party"]
+    delete props["partyColor"]
+    let sortable = [];
+    for (var key in props) {
+        sortable.push([key.replace('\r',''), props[key]]);
+    }
+    sortable.sort(function(a, b) {
+        return a[1] - b[1];
+    });
+    let keys = [];
+    let values = [];
+    let colors = [];
+    for(var k=0;k<sortable.length;k++){
+      keys.push(tr(sortable[k][0],ln))
+      values.push(sortable[k][1])
+      colors.push(partyColor[sortable[k][0]].Color)
+    }
+    console.log(colors)
     var data = [];
     for (var i = 0; i < keys.length; i++) {
       trace = {
-        y: ["תוצאות"],
+        y: ["קולות"],
         x: [values[i]],
         name: keys[i],
         orientation: "h",
         width: 0.5,
         type: "bar",
+        marker:{
+          color: colors[i]
+        },
       };
       data.push(trace);
     }
 
     var layout = {
       barmode: "stack",
-      height: 200,
+      height: 250,
       showlegend: false,
       yaxis: {
         showline: false,
         showgrid: false,
+        text:''
       },
       xaxis: {
         showline: false,
@@ -320,17 +361,37 @@ function addInteractions() {
       },
     };
 
-    new maplibregl.Popup({ maxWidth: "300px" })
+    popup
       .setLngLat(center.geometry.coordinates)
       .setHTML(description)
       .addTo(map);
 
     setDirection(ln);
-    console.log(data);
+    
     Plotly.newPlot("plot", data, layout, {
       scrollZoom: false,
       displayModeBar: false,
     });
+      
+    } catch (error) {
+      console.log("can't create popup for feature")
+      console.log(feature)
+      if(ln != "he" && ln != "ar" ){
+        //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+          var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }else{
+          var description = `<div class="popup-content-rtl"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }
+        description += `${tr("no_results_yet",ln)}`
+
+        popup
+          .setLngLat(center.geometry.coordinates)
+          .setHTML(description)
+          .addTo(map);
+
+
+    }
+    
   });
 
   // Change the cursor to a pointer when the mouse is over the places layer.
@@ -525,25 +586,53 @@ let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
 
   map.addControl(mydisplayNationtalScoreBtn);
 
-  // class displayUpdateDate {
-  //   onAdd(map){
-  //       this.map = map;
-        
-  //       this.container = document.createElement('div');
-  //       this.container.className = 'updateDateBtnMapboxgl maplibregl-ctrl mapboxgl-ctrl';
-  //       this.container.textContent = results2022["updateDate"]
-        
-  //       return this.container;
-  //   }
-  //   onRemove(){
-  //     this.container.parentNode.removeChild(this.container);
-  //     this.map = undefined;
-  //   }
+
+function addPlot(){
+    let layout = {
+      autosize: true,
+      width: vw*0.9,
+      height: 0.3*vh
+    }
+    let config = {
+      displayModeBar: false, // this is the line that hides the bar.
+    };
+    Plotly.newPlot("hiddenContent", nationalResults,layout,config);
+
+}
+function convertTime12to24 (time12h)  {
+  const [time, modifier] = time12h.split(' ');
+
+  let [hours, minutes] = time.split(':');
+
+  if (hours === '12') {
+    hours = '00';
+  }
+
+  if (modifier === 'PM') {
+    hours = parseInt(hours, 10) + 12;
+  }
+
+  return `${hours}:${minutes}`;
+}
+
+
+class UpdatesControl {
+  onAdd(map){
+    this.map = map;
+    this.container = document.createElement('div');
+    this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
+    let content = `${tr("partial_results",ln)}<br>`;
+    let dateArray = nationalResults.lastUpdate.split(',')
+    let time24= convertTime12to24(dateArray[1].trim())
+    var mdy = dateArray[0].split("/");
+    var dmy = mdy[1] + '/' + mdy[0] + '/' + mdy[2];
+    content += `${tr("last_update",ln)}: ${time24 + ' '+ dmy}`
+    this.container.innerHTML = content;
+    return this.container;
     
-  // }
-  
-  // let myUpdateDate = new displayUpdateDate();
-  
-  //   map.addControl(myUpdateDate,'bottom-left');
-  
-  
+  }
+  onRemove(){
+    this.container.parentNode.removeChild(this.container);
+    this.map = undefined;
+  }
+}
