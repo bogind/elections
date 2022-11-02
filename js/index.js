@@ -167,7 +167,12 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      console.log(feature)
+      trNames = dict[feature.properties.lms_code]
+      props = {
+          ...feature.properties,
+          ...trNames
+      };
+      feature.properties = props;
     }
     
   })
