@@ -513,6 +513,7 @@ class languageSelectionButtons {
       clickablearea.addEventListener("click", () => {
         ln = languageChange;
         map.setLayoutProperty('labels-symbol',"text-field", ["get", ln]);
+        map.setLayoutProperty('labels-symbol-zoomed-in',"text-field", ["get", ln]);
         if(ln != "he" &&  ln != "ar" ){
           try {
             this.container.classList.remove('popup-content-rtl')
