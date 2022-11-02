@@ -548,6 +548,21 @@ function addPlot(){
     Plotly.newPlot("hiddenContent", nationalResults,layout,config);
 
 }
+function convertTime12to24 (time12h)  {
+  const [time, modifier] = time12h.split(' ');
+
+  let [hours, minutes] = time.split(':');
+
+  if (hours === '12') {
+    hours = '00';
+  }
+
+  if (modifier === 'PM') {
+    hours = parseInt(hours, 10) + 12;
+  }
+
+  return `${hours}:${minutes}`;
+}
 
 
 class UpdatesControl {
@@ -556,9 +571,14 @@ class UpdatesControl {
     this.container = document.createElement('div');
     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
     let content = `${tr("partial_results",ln)}<br>`;
-    content += `${tr("last_update",ln)}: ${nationalResults.lastUpdate}`
+    let dateArray = nationalResults.lastUpdate.split(',')
+    let time24= convertTime12to24(dateArray[1].trim())
+    var mdy = dateArray[0].split("/");
+    var dmy = mdy[1] + '/' + mdy[0] + '/' + mdy[2];
+    content += `${tr("last_update",ln)}: ${time24 + ' '+ dmy}`
     this.container.innerHTML = content;
     return this.container;
+    
   }
   onRemove(){
     this.container.parentNode.removeChild(this.container);
