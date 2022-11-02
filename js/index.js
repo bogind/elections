@@ -491,10 +491,11 @@ class languageSelectionButtons {
         this.container.classList.remove('popup-content-rtl') 
         this.container.classList.add('popup-content-ltr') 
     }
-    this.container.appendChild(createLangBtn(" Hebrew | ", "he"));
-    this.container.appendChild(createLangBtn(" English | ", "en"));
-    this.container.appendChild(createLangBtn(" Arabic | ", "ar"));
-    this.container.appendChild(createLangBtn(" Russian", "ru"));
+    this.container.appendChild(createLangBtn(" Russian |", "ru"));
+    this.container.appendChild(createLangBtn(" Arabic |", "ar"));
+    this.container.appendChild(createLangBtn(" English |", "en"));
+    this.container.appendChild(createLangBtn(" Hebrew", "he"));
+
     function createLangBtn(btnLngText, lng) {
       let btn = document.createElement("button");
       btn.textContent = btnLngText;
