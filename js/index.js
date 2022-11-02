@@ -254,6 +254,25 @@ function addLayer() {
       ],
     ],
   });
+  map.addLayer({
+    id: "labels-symbol-zoomed-in",
+    type: "symbol",
+    source: "results",
+    minzoom: 11,
+    layout: {
+      "text-font": ["Noto Sans Regular"],
+      "text-field": ["get", ln],
+      "text-size": 16,
+      "text-anchor": "bottom",
+      "icon-allow-overlap": false,
+      "text-offset": [0, -2],
+    },
+    paint: {
+      "text-color": "black",
+      "text-halo-color": "white",
+      "text-halo-width": 1,
+    }
+  });
 
 
   addInteractions();
