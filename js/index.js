@@ -9,6 +9,8 @@ const vw = window.innerWidth;
 const vh = window.inneHeight;
 let updatesControl;
 let nationalResults;
+let nationalRawResults;
+let resultsForPlot;
 let results = 0
 let popup = new maplibregl.Popup({ maxWidth: "300px" });
 
@@ -123,10 +125,15 @@ async function loadBG() {
     try {
       partyColor = allResponses[0];
       setsGJ = allResponses[1]
-      nationalResults = allResponses[2]
+      nationalRawResults = allResponses[2]
       results2022 = allResponses[3]
-      //results = runCalc(nationalResults)
-      //nationalResults = addNationalResultsPlot()
+      nationalRawResults["ת"] = nationalRawResults["ת\r"]
+      delete nationalRawResults["ת\r"]
+      resultsForPlot = {}
+      Object.assign(resultsForPlot, nationalRawResults);
+      delete resultsForPlot['lastUpdate']
+      results = runCalc(resultsForPlot)
+      nationalResults = addNationalResultsPlot()
       mydisplayNationtalScoreBtn.onAdd()
       joinResults(setsGJ,results2022)  
       let updatesControl = new UpdatesControl();
@@ -611,7 +618,7 @@ class UpdatesControl {
     this.container = document.createElement('div');
     this.container.className = 'custom-control-class maplibregl-ctrl mapboxgl-ctrl';
     let content = `${tr("partial_results",ln)}<br>`;
-    let dateArray = nationalResults.lastUpdate.split(',')
+    let dateArray = nationalRawResults.lastUpdate.split(',')
     let time24= convertTime12to24(dateArray[1].trim())
     var mdy = dateArray[0].split("/");
     var dmy = mdy[1] + '/' + mdy[0] + '/' + mdy[2];
