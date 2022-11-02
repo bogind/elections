@@ -498,12 +498,12 @@ class languageSelectionButtons {
         this.container.classList.remove('popup-content-rtl') 
         this.container.classList.add('popup-content-ltr') 
     }
-    this.container.appendChild(createLangBtn(" Hebrew |", "he"));
-    this.container.appendChild(createLangBtn(" English |", "en"));
-    this.container.appendChild(createLangBtn(" Arabic |", "ar"));
+    this.container.appendChild(createLangBtn(" Hebrew | ", "he"));
+    this.container.appendChild(createLangBtn(" English | ", "en"));
+    this.container.appendChild(createLangBtn(" Arabic | ", "ar"));
     this.container.appendChild(createLangBtn(" Russian", "ru"));
     function createLangBtn(btnLngText, lng) {
-      let btn = document.createElement("a");
+      let btn = document.createElement("button");
       btn.textContent = btnLngText;
       btn.className = "langBtn";
       changeLanguge(btn, lng);
@@ -514,6 +514,7 @@ class languageSelectionButtons {
         ln = languageChange;
         map.setLayoutProperty('labels-symbol',"text-field", ["get", ln]);
         map.setLayoutProperty('labels-symbol-zoomed-in',"text-field", ["get", ln]);
+        document.getElementsByClassName("nationalResultsBtn")[0].innerText =  tr("nationalResults",ln)
         if(ln != "he" &&  ln != "ar" ){
           try {
             this.container.classList.remove('popup-content-rtl')
