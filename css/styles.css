@@ -13,10 +13,19 @@
 .popup-content-ltr{
   direction:ltr;
 }
-.langBtn{
-  cursor: pointer;
+
+
+.langBtn {
+  background-color: transparent;
+  border-width: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  line-height: inherit;
   color:gray;
-  text-shadow : horizontal-shadow vertical-shadow blur color;
+  margin-left:5px;
+  padding: 0px;
 }
 
 .nationalResultsBtn {
