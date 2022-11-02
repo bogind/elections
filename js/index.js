@@ -440,7 +440,18 @@ function addNationalResultsPlot(){
   return plotData
   
 }
+function addPlot(){
+  let layout = {
+    autosize: true,
+    width: vw*0.9,
+    height: 0.3*vh
+  }
+  let config = {
+    displayModeBar: false, // this is the line that hides the bar.
+  };
+  Plotly.newPlot("hiddenContent", nationalResults,layout,config);
 
+}
 class displayNationtalScore {
   onAdd(map){
       this.map = map;
@@ -574,6 +585,7 @@ class displayNationtalScoreBtn {
 let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
 
   map.addControl(mydisplayNationtalScoreBtn);
+
 
 function addPlot(){
     let layout = {
