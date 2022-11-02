@@ -167,7 +167,12 @@ function joinResults(setsGJ,results2022){
       props.cityVotingHeight = props.votingPercentage * 5000
       feature.properties = props;
     } catch (error) {
-      console.log(feature)
+      trNames = dict[feature.properties.lms_code]
+      props = {
+          ...feature.properties,
+          ...trNames
+      };
+      feature.properties = props;
     }
     
   })
@@ -254,6 +259,25 @@ function addLayer() {
       ],
     ],
   });
+  map.addLayer({
+    id: "labels-symbol-zoomed-in",
+    type: "symbol",
+    source: "results",
+    minzoom: 11,
+    layout: {
+      "text-font": ["Noto Sans Regular"],
+      "text-field": ["get", ln],
+      "text-size": 16,
+      "text-anchor": "bottom",
+      "icon-allow-overlap": false,
+      "text-offset": [0, -2],
+    },
+    paint: {
+      "text-color": "black",
+      "text-halo-color": "white",
+      "text-halo-width": 1,
+    }
+  });
 
 
   addInteractions();
@@ -262,8 +286,9 @@ function addLayer() {
 function addInteractions() {
   map.on("click", "results", function (e) {
     var feature = e.features[0];
+    var center = turf.centroid(feature.geometry);
     try {
-      var center = turf.centroid(feature.geometry);
+      
     if(ln != "he" && ln != "ar" ){
       //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
         var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
@@ -351,6 +376,20 @@ function addInteractions() {
     } catch (error) {
       console.log("can't create popup for feature")
       console.log(feature)
+      if(ln != "he" && ln != "ar" ){
+        //var description = `<h2>${tr(feature.properties.set_code, ln)}</h2>`;
+          var description = `<div class="popup-content-ltr"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }else{
+          var description = `<div class="popup-content-rtl"><h2>${tr(feature.properties.lms_code, ln)}</h2>`;
+        }
+        description += `${tr("no_results_yet",ln)}`
+
+        popup
+          .setLngLat(center.geometry.coordinates)
+          .setHTML(description)
+          .addTo(map);
+
+
     }
     
   });

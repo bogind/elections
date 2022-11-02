@@ -23,6 +23,12 @@ const dict = {
     ru:"Последнее обновление",
     ar:"اخر تحديث"
   },
+  "no_results_yet":{
+    he:"אין תוצאות עדיין",
+    en:"No results yet",
+    ru:"Пока нет результатов",
+    ar:"لا توجد نتائج بعد"
+  },
   "אמת": {
     he: "מפלגת העבודה",
     en: "The Israeli Labor Party",
