@@ -534,9 +534,9 @@ class languageSelectionButtons {
   }
 }
 
-let myCustomControl = new languageSelectionButtons();
+let languageSelectionControl = new languageSelectionButtons();
 
-map.addControl(myCustomControl, (position = "top-left"));
+map.addControl(languageSelectionControl, (position = "top-left"));
 
 class displayNationtalScoreBtn {
   onAdd(map){
@@ -634,3 +634,70 @@ class UpdatesControl {
     this.map = undefined;
   }
 }
+
+function toggleLegend(){
+    if(map.hasControl(legendControl)){
+        map.removeControl(legendControl)
+    }else{
+        map.addControl(legendControl,"top-left");
+    }
+}
+
+class LegendAddControl {
+    onAdd(map){
+      this.map = map;
+      this.container = document.createElement('div');
+      this.container.className = 'legend-button maplibregl-ctrl mapboxgl-ctrl maplibregl-ctrl-group mapboxgl-ctrl-group';
+      this.container.innerHTML = '<i class="fg-map-legend"></i>';
+      this.container.onclick = toggleLegend
+      return this.container;
+    }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+  }
+
+let legendAddControl = new LegendAddControl();
+
+map.addControl(legendAddControl,"top-left");
+
+class LegendControl {
+
+
+    onAdd(map){
+      this.map = map;
+      this.container = document.createElement('div');
+      this.container.className = 'legend maplibregl-ctrl mapboxgl-ctrl maplibregl-ctrl-group mapboxgl-ctrl-group';
+      if(ln != "he" && ln != "ar" ){
+        this.container.style.direction = "ltr"
+      }else{
+        this.container.style.direction = "rtl"
+      }
+      let list = document.createElement('ul');
+      let partykeys = Object.keys(partyColor)
+      let partiesToShow = ["אמת","ג","ד","ום","ט","כן","ל","מחל","מרצ","עם","פה","שס"]
+      for(var i=0;i<partykeys.length;i++){
+        if(partiesToShow.indexOf(partykeys[i]) > -1){
+            let li = document.createElement('li')
+            li.innerHTML = `<i style="background-color:${partyColor[partykeys[i]].Color}; color:${partyColor[partykeys[i]].Color}; padding:4px;">_</i> - ${tr(partykeys[i],ln)}`
+            list.append(li)
+        }
+        
+      }
+    
+      
+
+      this.container.append(list)
+      
+      return this.container;
+    }
+    onRemove(){
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+  }
+
+let legendControl = new LegendControl();
+
+  
