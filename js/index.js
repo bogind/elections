@@ -162,7 +162,7 @@ function joinResults(setsGJ,results2022){
       props.bzb = setResults["בזב"]
       props.voters = setResults["מצביעים"]
       props.kosher = setResults["כשרים"]
-      props.votingPercentage = props["מצביעים"]/props["בזב"]
+      props.votingPercentage = props.voters/props.bzb 
       delete setResults["בזב"];
       delete setResults["מצביעים"];
       delete setResults["כשרים"];
