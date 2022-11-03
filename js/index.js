@@ -329,7 +329,7 @@ function addInteractions() {
       values.push(sortable[k][1])
       colors.push(partyColor[sortable[k][0]].Color)
     }
-    console.log(colors)
+    
     var data = [];
     for (var i = 0; i < keys.length; i++) {
       trace = {
@@ -586,6 +586,7 @@ let mydisplayNationtalScoreBtn = new displayNationtalScoreBtn();
 
 
 function addPlot(){
+    nationalResults =addNationalResultsPlot()
     let layout = {
       autosize: true,
       width: vw*0.9,
