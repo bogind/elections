@@ -229,7 +229,7 @@ function addLayer() {
       "fill-extrusion-base": 50,
 
       // Make extrusions slightly opaque to see through indoor walls.
-      "fill-extrusion-opacity": 0.5,
+      "fill-extrusion-opacity": 1,
     },
     filter:[
       "in",
@@ -245,7 +245,7 @@ function addLayer() {
     type: "symbol",
     source: "results",
     layout: {
-      "text-font": ["Noto Sans Regular"],
+      "text-font": ["Noto Sans Bold"],
       "text-field": ["get", ln],
       "text-size": 16,
       "text-anchor": "bottom",
@@ -255,7 +255,7 @@ function addLayer() {
     paint: {
       "text-color": "black",
       "text-halo-color": "white",
-      "text-halo-width": 1,
+      "text-halo-width": 0.3,
     },
     filter: [
       "in",
