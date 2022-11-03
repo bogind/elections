@@ -5,6 +5,12 @@ const dict = {
     ru: "Партия, набравшая наибольшее количество голосов",
     ar: "الحزب الذي حصل على أكبر عدد من الأصوات",
   },
+  "votingPercentage":{
+    he:"אחוז ההצבעה",
+    en:"Voting precentage",
+    ru:"Процент голосов",
+    ar:"سبة التصويت"
+  },
   "nationalResults":{
     he:"תוצאות ארציות",
     en:"National Results",

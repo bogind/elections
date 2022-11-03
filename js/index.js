@@ -309,6 +309,7 @@ function addInteractions() {
       feature.properties.max_party,
       ln
     )}<br>`;
+    description += `${tr("votingPercentage",ln)}: ${(feature.properties.votingPercentage*100).toFixed(2)}%<br>`
     description += '<div id="plot">';
 
     let props = JSON.parse(feature.properties.electionsResults);
