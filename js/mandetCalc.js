@@ -376,7 +376,7 @@ var calcAll = function () {
 
     primaryResult.parties.sort((p1, p2) => p2.votes - p1.votes);
     primaryResult.parties.forEach(function (element) {
-        element.totalMandates = element.mandatesByVotes+element.spareMandates;
+        element.totalMandates = element.mandatesByVotes+element.spareMandates+ element.mandatesByConnection;
       });
     primaryResult.nationalVotingPercentage = parseFloat(primaryResult.totalVotes/ableVotes).toFixed(2)
     
