@@ -18,7 +18,7 @@ var map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-    glyphs: "https://bogind.github.io/glfonts/{fontstack}/{range}.pbf",
+    glyphs: "https://bogind.com/glfonts/{fontstack}/{range}.pbf",
     sources: {},
     layers: [
       {
